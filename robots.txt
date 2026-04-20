@@ -6,4 +6,4 @@ User-agent: *
 Allow: /
 
 # Point crawlers to the sitemap for faster full indexing
-Sitemap: https://YOUR_DOMAIN/sitemap.xml
+Sitemap: https://promit-dutta.github.io/marginalia/sitemap.xml
