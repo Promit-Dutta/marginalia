@@ -1,0 +1,9 @@
+# robots.txt — Marginalia
+# Allows all well-behaved search engine crawlers to index the site.
+# Replace YOUR_DOMAIN with your actual domain once deployed.
+
+User-agent: *
+Allow: /
+
+# Point crawlers to the sitemap for faster full indexing
+Sitemap: https://YOUR_DOMAIN/sitemap.xml

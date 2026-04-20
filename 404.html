@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Page not found — Marginalia</title>
+  <script>
+    (function(){
+      var s=localStorage.getItem('mg-theme');
+      var d=window.matchMedia('(prefers-color-scheme:dark)').matches;
+      document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=EB+Garamond:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400&display=swap"/>
+  <link rel="stylesheet" href="css/base.css"/>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 1.2rem;
+      padding: 2rem;
+      transition: background var(--t-slow), color var(--t-slow);
+    }
+
+    /* The large "404" number */
+    .err-num {
+      font-family: var(--font-display);
+      font-size: clamp(72px, 16vw, 120px);
+      font-weight: 300;
+      color: var(--text-3);
+      line-height: 1;
+      letter-spacing: 0.08em;
+    }
+
+    /* Message below */
+    .err-msg {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: clamp(16px, 3vw, 20px);
+      color: var(--text-2);
+      max-width: 420px;
+      line-height: 1.6;
+    }
+
+    /* A small ambient equation — keeps the mathematical identity intact */
+    .err-eq {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 13px;
+      color: var(--text-4);
+      opacity: 0.7;
+      margin-top: 0.5rem;
+    }
+
+    /* Navigation links */
+    .err-links {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+
+    .err-links a {
+      font-family: var(--font-sans);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--text-2);
+      text-decoration: none;
+      border-bottom: 0.5px solid var(--border-2);
+      padding-bottom: 2px;
+      transition: color var(--t-base), border-color var(--t-base);
+    }
+
+    .err-links a:hover {
+      color: var(--text);
+      border-color: var(--border-3);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="err-num">404</div>
+
+  <p class="err-msg">
+    This page seems to have wandered off — possibly into an
+    undecidable region of the mathematical universe.
+  </p>
+
+  <p class="err-eq">∂(∂M) = 0, but this URL does not exist.</p>
+
+  <div class="err-links">
+    <a href="index.html">← Home</a>
+    <a href="posts.html">All essays</a>
+  </div>
+
+</body>
+</html>

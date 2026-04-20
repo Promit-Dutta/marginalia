@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <script>
+    (function(){
+      var s=localStorage.getItem('mg-theme');
+      var d=window.matchMedia('(prefers-color-scheme:dark)').matches;
+      document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));
+    })();
+  </script>
+  <!-- CHANGE: post title and description -->
+  <title>Post Title — Marginalia</title>
+  <meta name="description" content="A short description of this post for search engines (150–160 chars)."/>
+  <meta property="og:title"       content="Post Title — Marginalia"/>
+  <meta property="og:description" content="Short description here."/>
+  <meta property="og:type"        content="article"/>
+  <meta property="og:url"         content="https://YOUR_DOMAIN/posts/POST_SLUG.html"/>
+  <link rel="canonical" href="https://YOUR_DOMAIN/posts/POST_SLUG.html"/>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=EB+Garamond:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400&display=swap"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"/>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{
+      delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],
+      throwOnError:false
+    })">
+  </script>
+  <link rel="stylesheet" href="../css/base.css"/>
+  <link rel="stylesheet" href="../css/layout.css"/>
+  <link rel="stylesheet" href="../css/post.css"/>
+</head>
+<body class="post-page">
+
+<nav class="post-nav">
+  <a href="../index.html" class="post-nav-logo">Marginalia</a>
+  <ul class="post-nav-links">
+    <li><a href="../posts.html">All essays</a></li>
+    <li><a href="../posts.html?tag=analysis">Analysis</a></li>
+    <li><a href="../posts.html?tag=algebra">Algebra</a></li>
+    <li><a href="../posts.html?tag=topology">Topology</a></li>
+    <li><a href="../index.html#about">About</a></li>
+  </ul>
+  <button id="theme-toggle" aria-label="Toggle dark mode">
+    <svg id="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+    <svg id="icon-sun" width="14" height="14" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" style="display:none">
+      <circle cx="12" cy="12" r="5"/>
+      <line x1="12" y1="1"  x2="12" y2="3"/>  <line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="4.22" y1="4.22"  x2="5.64"  y2="5.64"/>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+      <line x1="1"  y1="12" x2="3"  y2="12"/>  <line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="4.22" y1="19.78"  x2="5.64"  y2="18.36"/>
+      <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
+    </svg>
+  </button>
+</nav>
+<!-- ══ POST HERO ════════════════════════════════════════════════
+     Riemann Zeta ζ(½+it) — parametric curve, ripple at each zero.
+     The title text (.post-hero-content) is always on top.
+
+     TO CHANGE THE TITLE:  edit the tag span and h1 heading below.
+     TO CHANGE THE REGION: see TUNABLE constants in the script at the end.
+════════════════════════════════════════════════════════════════ -->
+<div class="post-hero">
+  <canvas id="hero-cv"></canvas>
+  <!-- CHANGE: tag class + post title -->
+  <div class="post-hero-content">
+    <span class="tag tag-analysis">Analysis</span>
+    <h1 class="post-hero-title">Your Post Title Here</h1>
+  </div>
+</div>
+<main class="post-wrap">
+
+  <header class="post-header">
+    <div class="post-meta">
+      <!-- CHANGE: date and read time -->
+      <span>Month DD, YYYY</span>
+      <span class="post-meta-dot">·</span>
+      <span>N min read</span>
+      <span class="post-meta-dot">·</span>
+      <span>Promit Dutta</span>
+    </div>
+  </header>
+
+  <!-- ══ POST BODY ═══════════════════════════════════════════════
+       QUICK REFERENCE:
+         Inline math      → $e^{i\pi}+1=0$
+         Display math     → $$\int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}$$
+                            (own paragraph, blank lines above and below)
+         Section heading  → <h2>Title</h2>
+         Sub-section      → <h3>Title</h3>
+         Definition box   → <div class="definition-box"><strong>Definition.</strong> …</div>
+         Theorem box      → <div class="theorem-box"><strong>Theorem.</strong> …</div>
+         Note / remark    → <div class="note-box">…</div>
+         Pull quote       → <div class="pull-quote">…</div>
+         Inline code      → <code>f(x)</code>
+         Drop cap         → automatic on the first paragraph in .post-body
+         New box type     → copy .theorem-box in post.css, rename, change ::before content
+  ════════════════════════════════════════════════════════════════ -->
+  <div class="post-body">
+
+    <p>
+      Opening paragraph. The first letter becomes a drop cap automatically.
+      Inline math works anywhere in text: $e^{i\pi}+1=0$.
+    </p>
+
+    <h2>Section heading</h2>
+
+    <p>Body text. Display equations go on their own paragraph:</p>
+
+    $$
+      \int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}
+    $$
+
+    <p>Always follow a display equation with a sentence that gives it context.</p>
+
+    <div class="definition-box">
+      <strong>Definition.</strong> A metric space $(X,d)$ is
+      <em>complete</em> if every Cauchy sequence converges in $X$.
+    </div>
+
+    <div class="theorem-box">
+      <strong>Theorem.</strong> Every compact metric space is complete.
+    </div>
+
+    <h3>A softer sub-section</h3>
+
+    <div class="note-box">
+      A note box for asides, caveats, or intuition that would interrupt prose.
+    </div>
+
+    <div class="pull-quote">"A memorable sentence or a relevant quotation."</div>
+
+    <p>Closing paragraph. End with something that lingers.</p>
+
+  </div>
+
+  <!-- CHANGE: update href values when prev/next posts exist -->
+  <nav class="post-footer" aria-label="Post navigation">
+    <a href="../posts.html">← All essays</a>
+    <a href="../posts.html">Next essay →</a>
+  </nav>
+
+</main>
+<section class="comments-section" id="comments">
+  <h2 class="comments-header">Discussion</h2>
+
+  <p class="comment-subtitle">
+    Comments are public and linked to your GitHub account.
+    Math works here — use <code>$...$</code> for inline and
+    <code>$$...$$</code> for display equations.
+    Please keep discussion constructive and on-topic.
+    <a href="../static/comment-policy.html"
+       class="comment-policy-link"
+       target="_blank" rel="noopener noreferrer">Comment policy →</a>
+  </p>
+
+  <div id="giscus-container"></div>
+  <script>
+  (function(){
+    var t   = document.documentElement.getAttribute('data-theme');
+    var gTh = (t === 'dark') ? 'dark_dimmed' : 'light';
+    var s   = document.createElement('script');
+    s.src   = 'https://giscus.app/client.js';
+    s.setAttribute('data-repo',              'Promit-Dutta/marginalia');
+    s.setAttribute('data-repo-id',           'R_kgDOSCWm-w');
+    s.setAttribute('data-category',          'General');
+    s.setAttribute('data-category-id',       'DIC_kwDOSCWm-84C7Nlg');
+    s.setAttribute('data-mapping',           'pathname');
+    s.setAttribute('data-strict',            '0');
+    s.setAttribute('data-reactions-enabled', '1');
+    s.setAttribute('data-emit-metadata',     '0');
+    s.setAttribute('data-input-position',    'bottom');
+    s.setAttribute('data-theme',             gTh);
+    s.setAttribute('data-lang',              'en');
+    s.setAttribute('data-loading',           'lazy');
+    s.setAttribute('crossorigin',            'anonymous');
+    s.async = true;
+    document.getElementById('giscus-container').appendChild(s);
+  })();
+  </script>
+</section>
+<footer class="site-footer">
+  <span class="site-footer-brand">Marginalia — a mathematics notebook</span>
+  <div class="site-footer-links">
+    <a href="../feed.xml">RSS</a>
+    <a href="../index.html">Home</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  function syncIcon(t){
+    var m=document.getElementById('icon-moon'), s=document.getElementById('icon-sun');
+    if(!m||!s) return;
+    m.style.display = t==='dark' ? 'none'  : 'block';
+    s.style.display = t==='dark' ? 'block' : 'none';
+  }
+  syncIcon(document.documentElement.getAttribute('data-theme'));
+  document.getElementById('theme-toggle').addEventListener('click', function(){
+    var curr = document.documentElement.getAttribute('data-theme');
+    var next = curr==='dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('mg-theme', next);
+    syncIcon(next);
+    var gf = document.querySelector('.giscus-frame');
+    if(gf){
+      gf.contentWindow.postMessage(
+        {giscus:{setConfig:{theme: next==='dark' ? 'dark_dimmed' : 'light'}}},
+        'https://giscus.app'
+      );
+    }
+  });
+})();
+</script>
+<!-- ══ RIEMANN ZETA FUNCTION ANIMATION ═════════════════════════
+     Draws the parametric curve ζ(½+it) in the complex plane.
+     Each time the curve passes through a non-trivial zero
+     (t ≈ 14.13, 21.02, 25.01, 30.42, 32.93, 37.59),
+     two concentric rings expand from the origin.
+
+     TUNABLE:
+       DURATION  — total animation length in ms (14000 = 14s)
+       T_MAX     — range of t parameter (42 catches first 5 zeros)
+       N_TERMS   — partial sum accuracy (120 is good for visuals)
+════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  var cv=document.getElementById('hero-cv'), ctx=cv.getContext('2d');
+  function resize(){cv.width=cv.offsetWidth||cv.parentElement.offsetWidth;cv.height=cv.offsetHeight||340;}
+  resize(); window.addEventListener('resize',resize);
+
+  var N=120;
+  function zeta(t){var re=0,im=0;
+    for(var n=1;n<=N;n++){var a=1/Math.sqrt(n),g=t*Math.log(n);re+=a*Math.cos(g);im-=a*Math.sin(g);}
+    return[re,im];}
+
+  var ZEROS=[14.1347,21.0220,25.0109,30.4249,32.9351,37.5862];
+  var fired=new Set(), ripples=[];
+  var RLIFE=1500, RMAX=52;
+
+  var DURATION=14000, TMAX=42, scale, start=null, prev=null;
+  function getScale(){return Math.min(cv.width,cv.height)*0.20;}
+
+  function draw(ts){
+    if(!start)start=ts;
+    var el=ts-start, dt=prev?Math.min(ts-prev,50):16; prev=ts;
+    scale=getScale();
+    var W=cv.width,H=cv.height,CX=W/2,CY=H/2;
+
+    ctx.fillStyle='#03050f'; ctx.fillRect(0,0,W,H);
+
+    ctx.save();ctx.strokeStyle='rgba(80,140,80,0.14)';ctx.lineWidth=0.7;ctx.setLineDash([4,6]);
+    ctx.beginPath();ctx.moveTo(0,CY);ctx.lineTo(W,CY);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(CX,0);ctx.lineTo(CX,H);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath();ctx.arc(CX,CY,2.5,0,Math.PI*2);ctx.fillStyle='rgba(100,170,100,0.28)';ctx.fill();
+    ctx.restore();
+
+    var prog=Math.min(el/DURATION,1), tNow=prog*TMAX;
+    var STEPS=Math.max(200,Math.round((tNow/TMAX)*900));
+
+    function px(re){return CX+re*scale;}
+    function py(im){return CY-im*scale;}
+
+    ctx.save();ctx.strokeStyle='rgba(60,140,60,0.06)';ctx.lineWidth=8;
+    ctx.lineJoin='round';ctx.lineCap='round';ctx.beginPath();var f=true;
+    for(var i=0;i<=STEPS;i++){var pt=zeta((i/STEPS)*tNow);
+      if(!isFinite(pt[0])){f=true;continue;}
+      f?ctx.moveTo(px(pt[0]),py(pt[1])):ctx.lineTo(px(pt[0]),py(pt[1]));f=false;}
+    ctx.stroke();ctx.restore();
+
+    ctx.save();ctx.strokeStyle='rgba(50,110,50,0.88)';ctx.lineWidth=1.5;
+    ctx.lineJoin='round';ctx.lineCap='round';f=true;ctx.beginPath();
+    for(var i=0;i<=STEPS;i++){var pt=zeta((i/STEPS)*tNow);
+      if(!isFinite(pt[0])){f=true;continue;}
+      f?ctx.moveTo(px(pt[0]),py(pt[1])):ctx.lineTo(px(pt[0]),py(pt[1]));f=false;}
+    ctx.stroke();ctx.restore();
+
+    ZEROS.forEach(function(t0,idx){
+      if(!fired.has(idx)&&tNow>=t0){ripples.push({age:0});fired.add(idx);}});
+
+    for(var i=ripples.length-1;i>=0;i--){
+      ripples[i].age+=dt;
+      if(ripples[i].age>RLIFE){ripples.splice(i,1);continue;}
+      var p=ripples[i].age/RLIFE, r=p*RMAX, al=(1-p)*0.55;
+      ctx.beginPath();ctx.arc(CX,CY,r,0,Math.PI*2);
+      ctx.strokeStyle='rgba(90,180,230,'+al+')';ctx.lineWidth=1.5;ctx.stroke();
+      if(p>0.12){var r2=((p-0.12)/0.88)*RMAX*0.6,a2=(1-(p-0.12)/0.88)*0.28;
+        ctx.beginPath();ctx.arc(CX,CY,r2,0,Math.PI*2);
+        ctx.strokeStyle='rgba(130,210,245,'+a2+')';ctx.lineWidth=0.9;ctx.stroke();}}
+
+    if(prog<1){var pt2=zeta(tNow);
+      if(isFinite(px(pt2[0]))){
+        var p2=0.5+0.5*Math.sin(ts*0.010);
+        ctx.beginPath();ctx.arc(px(pt2[0]),py(pt2[1]),2+p2*2.5,0,Math.PI*2);
+        ctx.fillStyle='rgba(80,180,80,'+(0.5+p2*0.38)+')';ctx.fill();}}
+
+    var g=ctx.createLinearGradient(0,H*0.52,0,H);
+    g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,0.78)');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+
+    if(prog>=1&&el>DURATION+2000){start=ts;prev=null;fired.clear();ripples.length=0;}
+    requestAnimationFrame(draw);}
+  requestAnimationFrame(draw);
+})();
+</script>
+
+<script>
+(function(){
+  var commentpolicyLink = document.querySelector('.comment-policy-link');
+  if(commentpolicyLink){
+    commentpolicyLink.href = '../static/comment-policy.html?from=' + encodeURIComponent(window.location.href);
+  }
+})();
+</script>
+
+</body>
+</html>

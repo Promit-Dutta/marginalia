@@ -1,0 +1,71 @@
+/*
+  watercolor.css — Background painting layer for the homepage.
+  The SVG artwork itself lives in index.html ("OIL PAINTING SVG").
+  This file only controls positioning, opacity, and the scrim overlay.
+
+  ADJUST PAINTING OPACITY: change --painting-opacity in :root below.
+  ADJUST SCRIM STRENGTH: change the rgba alpha values in .page-scrim.
+*/
+
+:root {
+  --painting-opacity: 0.95;
+}
+
+/* Fixed full-viewport background — behind all page content */
+.landscape-bg {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-below);
+  pointer-events: none;
+  opacity: var(--painting-opacity);
+  transition: opacity var(--t-slow);
+}
+
+[data-theme="dark"] .landscape-bg {
+  opacity: 0.60;
+  filter: brightness(0.65) saturate(0.75);
+}
+
+/* Page content floats above the painting */
+.page-content {
+  position: relative;
+  z-index: var(--z-raised);
+}
+
+/* Bottom-to-transparent scrim — improves text legibility over the painting.
+   Uses an explicit DOM element to avoid pseudo-element z-index fragility. */
+.page-scrim {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 65%;
+  background: linear-gradient(
+    to top,
+    rgba(8, 14, 5, 0.50),
+    rgba(8, 14, 5, 0.18) 55%,
+    transparent
+  );
+  z-index: var(--z-raised);
+  pointer-events: none;
+  transition: background var(--t-slow);
+}
+
+[data-theme="dark"] .page-scrim {
+  background: linear-gradient(
+    to top,
+    rgba(3, 6, 2, 0.78),
+    rgba(3, 6, 2, 0.35) 55%,
+    transparent
+  );
+}
+
+/* Frosted-glass card — used in the homepage about section */
+.glass-card {
+  background: var(--glass-bg);
+  border: 0.5px solid var(--glass-border);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: var(--t-color);
+}

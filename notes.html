@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- ─── CHANGE: update description as the page grows ─── -->
+  <title>Marginal Notes — Marginalia</title>
+  <meta name="description" content="A running notebook by Promit Dutta — current readings, half-formed thoughts, and the occasional mathematical tangent."/>
+  <meta property="og:title"       content="Marginal Notes — Marginalia"/>
+  <meta property="og:description" content="A running notebook — current readings, half-formed thoughts, and occasional tangents."/>
+  <meta property="og:type"        content="website"/>
+  <link rel="canonical"           href="https://YOUR_DOMAIN/notes.html"/>
+  <script>
+    (function(){
+      var s=localStorage.getItem('mg-theme');
+      var d=window.matchMedia('(prefers-color-scheme:dark)').matches;
+      document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));
+    })();
+  </script>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=EB+Garamond:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400&display=swap"/>
+  <!-- KaTeX: inline $...$ and display $$...$$ work here too -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"/>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{
+      delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],
+      throwOnError:false
+    })">
+  </script>
+  <link rel="stylesheet" href="css/base.css"/>
+  <link rel="stylesheet" href="css/layout.css"/>
+
+  <style>
+    /*
+      notes.css (inlined) — styles for the Marginal Notes journal page.
+      All colors use CSS variables from base.css — dark mode is automatic.
+
+      HOW TO ADD A NEW ENTRY:
+        1. Copy any <article class="note-entry"> block.
+        2. Paste it ABOVE all other entries (newest entry goes first).
+        3. Update: id, date, year, time, title, and body text.
+        4. Math: $inline$ and $$display$$ work exactly as in posts.
+        5. Increment the entry count in .notes-header-meta.
+
+      LAYOUT:
+        Desktop: two-column grid — date in left margin, content right.
+        Mobile: single column, date above content.
+    */
+
+    body.notes-page {
+      background: var(--post-bg);
+      color: var(--post-text);
+      transition: var(--t-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Sticky nav ── */
+    .notes-nav {
+      position: sticky;
+      top: 0;
+      z-index: var(--z-nav);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--sp-6);
+      height: var(--nav-h);
+      background: rgba(255,255,255,0.94);
+      border-bottom: 0.5px solid var(--post-border);
+      backdrop-filter: var(--nav-blur);
+      -webkit-backdrop-filter: var(--nav-blur);
+      transition: var(--t-color);
+    }
+    [data-theme="dark"] .notes-nav { background: rgba(9,18,7,0.96); }
+
+    .notes-nav-logo {
+      font-family: var(--font-display);
+      font-size: 18px; font-weight: 300; letter-spacing: 0.06em;
+      color: var(--post-text); transition: color var(--t-base);
+    }
+    .notes-nav-logo:hover { color: var(--text-2); }
+
+    .notes-nav-links {
+      display: flex; gap: var(--sp-5); list-style: none; align-items: center;
+    }
+    .notes-nav-links a {
+      font-family: var(--font-sans); font-size: 12px;
+      color: var(--post-text-3); letter-spacing: 0.06em;
+      transition: color var(--t-base);
+    }
+    .notes-nav-links a:hover  { color: var(--post-text); }
+    .notes-nav-links a.active { color: var(--post-text); }
+
+    /* ── Main wrapper ── */
+    .notes-wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: var(--sp-7) var(--sp-6) var(--sp-8);
+      flex: 1;
+    }
+
+    /* ── Page header ──
+       Quieter than post heroes. This is a notebook, not a lecture. */
+    .notes-header {
+      margin-bottom: var(--sp-7);
+      padding-bottom: var(--sp-5);
+      border-bottom: 0.5px solid var(--post-border);
+    }
+
+    .notes-title {
+      font-family: var(--font-display);
+      font-size: clamp(32px,5vw,44px);
+      font-weight: 300;
+      letter-spacing: 0.04em;
+      color: var(--post-text);
+      line-height: 1.1;
+      margin-bottom: var(--sp-3);
+    }
+
+    .notes-desc {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 16px;
+      color: var(--post-text-3);
+      line-height: 1.65;
+      max-width: 520px;
+      margin-bottom: var(--sp-4);
+    }
+
+    .notes-header-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-4);
+    }
+
+    .notes-entry-count {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 13px;
+      color: var(--post-text-3);
+    }
+
+    /* ── Entry: two-column grid ──
+       Left (108px) = the margin  |  Right (1fr) = the page  */
+    .note-entry {
+      display: grid;
+      grid-template-columns: 108px 1fr;
+      gap: 0 var(--sp-6);
+      padding: var(--sp-6) 0;
+      border-bottom: 0.5px solid var(--post-border);
+      transition: var(--t-color);
+    }
+    .note-entry:last-child { border-bottom: none; }
+
+    /* Left column: date sits in the "margin" */
+    .note-aside {
+      text-align: right;
+      border-right: 1px solid var(--post-border);
+      padding-right: var(--sp-4);
+      padding-top: 4px;      /* optical alignment with first text baseline */
+      transition: var(--t-color);
+    }
+
+    .note-date {
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 13px; font-weight: 400;
+      color: var(--post-text-2);
+      letter-spacing: 0.04em;
+      line-height: 1.3;
+    }
+
+    .note-year {
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 11px;
+      color: var(--post-text-3);
+      letter-spacing: 0.04em;
+      margin-top: 2px;
+    }
+
+    .note-time {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--post-text-3);
+      margin-top: var(--sp-2);
+      letter-spacing: 0.06em;
+      opacity: 0.65;
+    }
+
+    /* Permalink anchor — visible on entry hover only */
+    .note-permalink {
+      display: block;
+      margin-top: var(--sp-2);
+      font-family: var(--font-sans);
+      font-size: 10px;
+      color: var(--post-text-3);
+      opacity: 0;
+      transition: opacity var(--t-base);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+    }
+    .note-entry:hover .note-permalink  { opacity: 0.5; }
+    .note-permalink:hover              { opacity: 1 !important; }
+
+    /* Right column: content */
+    .note-content { padding-left: var(--sp-2); }
+
+    /* Entry title — softer than post h2 */
+    .note-title {
+      font-family: var(--font-serif);
+      font-size: 20px; font-weight: 400;
+      color: var(--post-text);
+      margin-bottom: var(--sp-3);
+      line-height: 1.35;
+      letter-spacing: 0.01em;
+    }
+
+    /* Body text — 17px, EB Garamond, comfortable line height */
+    .note-text {
+      font-family: var(--font-serif);
+      font-size: 17px;
+      line-height: 1.85;
+      color: var(--post-text);
+    }
+    .note-text p            { margin-bottom: var(--sp-4); }
+    .note-text p:last-child { margin-bottom: 0; }
+    .note-text em           { font-style: italic; }
+    .note-text strong       { font-weight: 500; }
+
+    .note-text a {
+      color: var(--text-2);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-thickness: 0.5px;
+      transition: color var(--t-base);
+    }
+    .note-text a:hover { color: var(--post-text); }
+
+    .note-text code {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      background: var(--post-code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--post-text-2);
+      transition: var(--t-color);
+    }
+
+    /* Display equations: same accent as post pages */
+    .note-text .katex-display {
+      margin: var(--sp-5) 0 !important;
+      overflow-x: auto;
+      padding: var(--sp-4) var(--sp-5);
+      border-left: 2px solid var(--post-eq-bar);
+      background: var(--post-eq-bg);
+      border-radius: 0 6px 6px 0;
+      transition: var(--t-color);
+    }
+
+    /* Blockquote — for quoted passages */
+    .note-text blockquote {
+      border-left: 2px solid var(--post-border);
+      padding-left: var(--sp-5);
+      margin: var(--sp-4) 0;
+      font-style: italic;
+      color: var(--post-text-2);
+    }
+
+    /* ── Footer ── */
+    .notes-footer {
+      border-top: 0.5px solid var(--post-border);
+      padding: var(--sp-5) var(--sp-6);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      color: var(--post-text-3);
+      transition: var(--t-color);
+    }
+    .notes-footer a { color: var(--post-text-3); transition: color var(--t-base); }
+    .notes-footer a:hover { color: var(--post-text); }
+
+    /* ── Mobile ── */
+    @media (max-width: 640px) {
+      .notes-wrap  { padding: var(--sp-5) var(--sp-4) var(--sp-7); }
+
+      .note-entry  { grid-template-columns: 1fr; gap: var(--sp-2); }
+
+      .note-aside  {
+        text-align: left;
+        border-right: none;
+        border-bottom: 0.5px solid var(--post-border);
+        padding-right: 0;
+        padding-bottom: var(--sp-2);
+        padding-top: 0;
+        display: flex;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: var(--sp-2);
+      }
+
+      .note-date, .note-year, .note-time { display: inline; margin-top: 0; }
+      .note-permalink  { display: none; }
+      .note-content    { padding-left: 0; padding-top: var(--sp-3); }
+
+      .notes-nav-links { gap: var(--sp-3); }
+      .notes-nav-links a { font-size: 11px; }
+      .notes-footer    { flex-direction: column; gap: var(--sp-2);
+                         text-align: center; padding: var(--sp-4); }
+    }
+  </style>
+</head>
+
+<body class="notes-page">
+
+<!-- ══ STICKY NAV ════════════════════════════════════════════ -->
+<nav class="notes-nav">
+  <a href="index.html" class="notes-nav-logo">Marginalia</a>
+  <ul class="notes-nav-links">
+    <li><a href="posts.html">All essays</a></li>
+    <li><a href="posts.html?tag=analysis">Analysis</a></li>
+    <li><a href="posts.html?tag=algebra">Algebra</a></li>
+    <li><a href="posts.html?tag=topology">Topology</a></li>
+    <li><a href="notes.html" class="active">Marginal Notes</a></li>
+    <li><a href="index.html#about">About</a></li>
+  </ul>
+  <button id="theme-toggle" aria-label="Toggle dark mode">
+    <svg id="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+    <svg id="icon-sun" width="14" height="14" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" style="display:none">
+      <circle cx="12" cy="12" r="5"/>
+      <line x1="12" y1="1"  x2="12" y2="3"/>  <line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="4.22" y1="4.22"   x2="5.64"  y2="5.64"/>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+      <line x1="1"  y1="12" x2="3"  y2="12"/>  <line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="4.22"  y1="19.78" x2="5.64"  y2="18.36"/>
+      <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
+    </svg>
+  </button>
+</nav>
+
+
+<!-- ══ MAIN CONTENT ══════════════════════════════════════════ -->
+<main class="notes-wrap">
+
+  <header class="notes-header">
+    <h1 class="notes-title">Marginal Notes</h1>
+    <p class="notes-desc">
+      A running notebook. Not polished essays — just current readings,
+      half-formed thoughts, and the occasional mathematical tangent.
+    </p>
+    <div class="notes-header-meta">
+      <span class="tag tag-notes">Journal</span>
+      <!-- ─── UPDATE THIS COUNT when you add entries ─── -->
+      <span class="notes-entry-count">1 entry</span>
+    </div>
+  </header>
+
+
+  <!-- ════════════════════════════════════════════════════════
+       ADDING A NEW ENTRY — template to copy:
+
+       <article class="note-entry" id="note-YYYY-MM-DD">
+         <aside class="note-aside">
+           <time class="note-date">Mon DD</time>
+           <span class="note-year">YYYY</span>
+           <span class="note-time">HH:MM</span>
+           <a class="note-permalink" href="#note-YYYY-MM-DD" title="Link to entry">#</a>
+         </aside>
+         <div class="note-content">
+           <h3 class="note-title">Optional title</h3>
+           <div class="note-text">
+             <p>Your text here. Inline math: $e^{i\pi}+1=0$</p>
+             $$\text{Display math on its own paragraph}$$
+             <p>More text.</p>
+           </div>
+         </div>
+       </article>
+
+       RULES:
+         - Paste new entries ABOVE all existing ones (newest first)
+         - For multiple entries same day: id="note-2026-04-20-2" etc.
+         - Omit <h3 class="note-title"> for untitled entries
+         - Update the entry count in the header above
+  ════════════════════════════════════════════════════════ -->
+
+
+  <article class="note-entry" id="note-2026-04-20">
+    <aside class="note-aside">
+      <time class="note-date">Apr 20</time>
+      <span class="note-year">2026</span>
+      <span class="note-time">14:32</span>
+      <a class="note-permalink" href="#note-2026-04-20" title="Link to this entry">#</a>
+    </aside>
+    <div class="note-content">
+      <h3 class="note-title">My Very First Note</h3>
+      <div class="note-text">
+        <p>
+          I've had this wish for a long time to have my own blog, partly because I find it very 
+          helpful to keep track of my undersanding of a piece of mathematics.  
+        </p>
+        <p>
+          One of the biggest challenges while learning new math, I feel, is to avoid superficial
+          understanding. Often the feeling that 'I know this' doesn't reflect the reality of understanding.
+          One of the best ways to overcome this is to explain the math to others.
+        </p>
+        <p> At the moment, I don't have many peers to regularly discuss math with. So, I decided an approach which has the 
+          immense ability to reach a greater number of math enthusiasts (who, I hope, are in abundance in the great sea of the internet!)
+          and take their perspective on the math. It is a highly rewarding experience to learn different tools and approaches.
+        </p>
+        <p> 
+            I will try to keep this Blog active throughout the undergraduate years. This page (as you've probably already noticed)
+            will primarily consist of the half-formed ideas, or informal notes, occasional updates. In contrast,
+            the posts will be (atleast tried to be) more rigorous and structured pieces of math, not denying the fact that it can contain errors, 
+            which is why the posts have a comment section(Giscus) for the readers, who can point out errors, or provide extended
+            view of the topic, or offer different perspective. In the initial days posts may take longer to come. I may change the UI, introduce new sections
+            (if relevant) as the blog evolves. For now, this is where it begins.
+            
+        </p>
+        <p>
+            Thank you.
+        </p>
+      </div>
+    </div>
+  </article>
+
+
+  
+
+  
+
+</main>
+
+
+<footer class="notes-footer">
+  <span style="font-family:var(--font-serif);font-style:italic;">
+    Marginalia — a mathematics notebook
+  </span>
+  <div style="display:flex;gap:1.2rem;">
+    <a href="posts.html">Essays</a>
+    <a href="index.html">Home</a>
+  </div>
+</footer>
+
+
+<!-- Dark mode toggle script — identical pattern to all other pages -->
+<script>
+(function(){
+  function syncIcon(t){
+    var m=document.getElementById('icon-moon');
+    var s=document.getElementById('icon-sun');
+    if(!m||!s)return;
+    m.style.display = t==='dark' ? 'none'  : 'block';
+    s.style.display = t==='dark' ? 'block' : 'none';
+  }
+  syncIcon(document.documentElement.getAttribute('data-theme'));
+  document.getElementById('theme-toggle').addEventListener('click',function(){
+    var curr = document.documentElement.getAttribute('data-theme');
+    var next = curr==='dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('mg-theme', next);
+    syncIcon(next);
+  });
+})();
+</script>
+
+</body>
+</html>

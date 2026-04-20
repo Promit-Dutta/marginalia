@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Background: deep sage, matches the blog's dark palette -->
+  <rect width="32" height="32" rx="6" fill="#1e261a"/>
+  <!-- The italic "∂" (partial derivative) in Cormorant Garamond style.
+       Rendered as a path so it works without fonts loading.
+       Clean, mathematical, immediately recognisable as a math blog. -->
+  <text
+    x="16" y="23"
+    font-family="Georgia, serif"
+    font-size="22"
+    font-style="italic"
+    font-weight="400"
+    text-anchor="middle"
+    fill="#a0b088"
+    letter-spacing="-0.5"
+  >∂</text>
+</svg>

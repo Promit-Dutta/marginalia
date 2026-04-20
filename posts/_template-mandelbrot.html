@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <script>
+    (function(){
+      var s=localStorage.getItem('mg-theme');
+      var d=window.matchMedia('(prefers-color-scheme:dark)').matches;
+      document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));
+    })();
+  </script>
+  <!-- CHANGE: post title and description -->
+  <title>Post Title — Marginalia</title>
+  <meta name="description" content="A short description of this post for search engines (150–160 chars)."/>
+  <meta property="og:title"       content="Post Title — Marginalia"/>
+  <meta property="og:description" content="Short description here."/>
+  <meta property="og:type"        content="article"/>
+  <meta property="og:url"         content="https://YOUR_DOMAIN/posts/POST_SLUG.html"/>
+  <link rel="canonical" href="https://YOUR_DOMAIN/posts/POST_SLUG.html"/>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=EB+Garamond:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400&display=swap"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"/>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{
+      delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],
+      throwOnError:false
+    })">
+  </script>
+  <link rel="stylesheet" href="../css/base.css"/>
+  <link rel="stylesheet" href="../css/layout.css"/>
+  <link rel="stylesheet" href="../css/post.css"/>
+</head>
+<body class="post-page">
+
+<nav class="post-nav">
+  <a href="../index.html" class="post-nav-logo">Marginalia</a>
+  <ul class="post-nav-links">
+    <li><a href="../posts.html">All essays</a></li>
+    <li><a href="../posts.html?tag=analysis">Analysis</a></li>
+    <li><a href="../posts.html?tag=algebra">Algebra</a></li>
+    <li><a href="../posts.html?tag=topology">Topology</a></li>
+    <li><a href="../index.html#about">About</a></li>
+  </ul>
+  <button id="theme-toggle" aria-label="Toggle dark mode">
+    <svg id="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+    <svg id="icon-sun" width="14" height="14" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" style="display:none">
+      <circle cx="12" cy="12" r="5"/>
+      <line x1="12" y1="1"  x2="12" y2="3"/>  <line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="4.22" y1="4.22"  x2="5.64"  y2="5.64"/>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+      <line x1="1"  y1="12" x2="3"  y2="12"/>  <line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="4.22" y1="19.78"  x2="5.64"  y2="18.36"/>
+      <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
+    </svg>
+  </button>
+</nav>
+<!-- ══ POST HERO ════════════════════════════════════════════════
+     Mandelbrot Set — progressive render, slow palette cycling.
+     The title text (.post-hero-content) is always on top.
+
+     TO CHANGE THE TITLE:  edit the tag span and h1 heading below.
+     TO CHANGE THE REGION: see TUNABLE constants in the script at the end.
+       CX=-0.5,     CY=0,      ZOOM=1    → full classic view (default)
+       CX=-0.7269,  CY=0.1889, ZOOM=200  → deep spiral zoom
+       CX=-1.315,   CY=0.073,  ZOOM=350  → seahorse valley
+════════════════════════════════════════════════════════════════ -->
+<div class="post-hero">
+  <canvas id="hero-cv"></canvas>
+  <!-- CHANGE: tag class + post title -->
+  <div class="post-hero-content">
+    <span class="tag tag-analysis">Analysis</span>
+    <h1 class="post-hero-title">Your Post Title Here</h1>
+  </div>
+</div>
+<main class="post-wrap">
+
+  <header class="post-header">
+    <div class="post-meta">
+      <!-- CHANGE: date and read time -->
+      <span>Month DD, YYYY</span>
+      <span class="post-meta-dot">·</span>
+      <span>N min read</span>
+      <span class="post-meta-dot">·</span>
+      <span>Promit Dutta</span>
+    </div>
+  </header>
+
+  <!-- ══ POST BODY ═══════════════════════════════════════════════
+       QUICK REFERENCE:
+         Inline math      → $e^{i\pi}+1=0$
+         Display math     → $$\int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}$$
+                            (own paragraph, blank lines above and below)
+         Section heading  → <h2>Title</h2>
+         Sub-section      → <h3>Title</h3>
+         Definition box   → <div class="definition-box"><strong>Definition.</strong> …</div>
+         Theorem box      → <div class="theorem-box"><strong>Theorem.</strong> …</div>
+         Note / remark    → <div class="note-box">…</div>
+         Pull quote       → <div class="pull-quote">…</div>
+         Inline code      → <code>f(x)</code>
+         Drop cap         → automatic on the first paragraph in .post-body
+         New box type     → copy .theorem-box in post.css, rename, change ::before content
+  ════════════════════════════════════════════════════════════════ -->
+  <div class="post-body">
+
+    <p>
+      Opening paragraph. The first letter becomes a drop cap automatically.
+      Inline math works anywhere in text: $e^{i\pi}+1=0$.
+    </p>
+
+    <h2>Section heading</h2>
+
+    <p>Body text. Display equations go on their own paragraph:</p>
+
+    $$
+      \int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}
+    $$
+
+    <p>Always follow a display equation with a sentence that gives it context.</p>
+
+    <div class="definition-box">
+      <strong>Definition.</strong> A metric space $(X,d)$ is
+      <em>complete</em> if every Cauchy sequence converges in $X$.
+    </div>
+
+    <div class="theorem-box">
+      <strong>Theorem.</strong> Every compact metric space is complete.
+    </div>
+
+    <h3>A softer sub-section</h3>
+
+    <div class="note-box">
+      A note box for asides, caveats, or intuition that would interrupt prose.
+    </div>
+
+    <div class="pull-quote">"A memorable sentence or a relevant quotation."</div>
+
+    <p>Closing paragraph. End with something that lingers.</p>
+
+  </div>
+
+  <!-- CHANGE: update href values when prev/next posts exist -->
+  <nav class="post-footer" aria-label="Post navigation">
+    <a href="../posts.html">← All essays</a>
+    <a href="../posts.html">Next essay →</a>
+  </nav>
+
+</main>
+<!-- ══ COMMENTS ════════════════════════════════════════════════
+     Powered by Giscus (GitHub Discussions).
+     Commenters can write $inline$ or $$display$$ math directly.
+
+     SETUP (one-time):
+       1. Push this repo to GitHub (public)
+       2. Repo → Settings → Features → check Discussions
+       3. Install Giscus app: github.com/apps/giscus
+       4. Get your config at giscus.app
+       5. Replace the four YOUR_* values in the script below.
+════════════════════════════════════════════════════════════════ -->
+<section class="comments-section" id="comments">
+  <h2 class="comments-header">Discussion</h2>
+
+  <p class="comment-subtitle">
+    Comments are public and linked to your GitHub account.
+    Math works here — use <code>$...$</code> for inline and
+    <code>$$...$$</code> for display equations.
+    Please keep discussion constructive and on-topic.
+    <a href="../static/comment-policy.html"
+       class="comment-policy-link"
+       target="_blank" rel="noopener noreferrer">Comment policy →</a>
+  </p>
+
+  <div id="giscus-container"></div>
+  <script>
+  (function(){
+    var t   = document.documentElement.getAttribute('data-theme');
+    var gTh = (t === 'dark') ? 'dark_dimmed' : 'light';
+    var s   = document.createElement('script');
+    s.src   = 'https://giscus.app/client.js';
+    s.setAttribute('data-repo',              'Promit-Dutta/marginalia');
+    s.setAttribute('data-repo-id',           'R_kgDOSCWm-w');
+    s.setAttribute('data-category',          'General');
+    s.setAttribute('data-category-id',       'DIC_kwDOSCWm-84C7Nlg');
+    s.setAttribute('data-mapping',           'pathname');
+    s.setAttribute('data-strict',            '0');
+    s.setAttribute('data-reactions-enabled', '1');
+    s.setAttribute('data-emit-metadata',     '0');
+    s.setAttribute('data-input-position',    'bottom');
+    s.setAttribute('data-theme',             gTh);
+    s.setAttribute('data-lang',              'en');
+    s.setAttribute('data-loading',           'lazy');
+    s.setAttribute('crossorigin',            'anonymous');
+    s.async = true;
+    document.getElementById('giscus-container').appendChild(s);
+  })();
+  </script>
+</section>
+<footer class="site-footer">
+  <span class="site-footer-brand">Marginalia — a mathematics notebook</span>
+  <div class="site-footer-links">
+    <a href="../feed.xml">RSS</a>
+    <a href="../index.html">Home</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  function syncIcon(t){
+    var m=document.getElementById('icon-moon'), s=document.getElementById('icon-sun');
+    if(!m||!s) return;
+    m.style.display = t==='dark' ? 'none'  : 'block';
+    s.style.display = t==='dark' ? 'block' : 'none';
+  }
+  syncIcon(document.documentElement.getAttribute('data-theme'));
+  document.getElementById('theme-toggle').addEventListener('click', function(){
+    var curr = document.documentElement.getAttribute('data-theme');
+    var next = curr==='dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('mg-theme', next);
+    syncIcon(next);
+    var gf = document.querySelector('.giscus-frame');
+    if(gf){
+      gf.contentWindow.postMessage(
+        {giscus:{setConfig:{theme: next==='dark' ? 'dark_dimmed' : 'light'}}},
+        'https://giscus.app'
+      );
+    }
+  });
+})();
+</script>
+<!-- ══ MANDELBROT SET ANIMATION ════════════════════════════════
+     Progressive render: 8x8 blocks → 4x4 → 2x2 → full pixel.
+     After render, palette cycles slowly and continuously.
+
+     TUNABLE:
+       CX, CY, ZOOM  — which region to render
+       MAX_ITER      — render detail (180 is a good balance)
+       PALETTE_SPEED — color cycle rate (0.000035 = very slow)
+════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  var cv=document.getElementById('hero-cv'), ctx=cv.getContext('2d');
+  function resize(){cv.width=cv.offsetWidth||cv.parentElement.offsetWidth; cv.height=cv.offsetHeight||340;}
+  resize(); window.addEventListener('resize',function(){resize();startRender();});
+
+  var CX=-0.5, CY=0, ZOOM=1, MAX_ITER=180;
+  var PAL=[[9,1,47],[4,4,73],[0,7,100],[12,44,138],[24,82,177],[57,125,209],
+           [134,181,229],[211,236,248],[241,233,191],[248,201,95],[255,170,0],
+           [204,128,0],[153,87,0],[106,52,3],[66,30,15],[25,7,26]];
+
+  function palColor(t){
+    var n=PAL.length, fi=t*(n-1), lo=Math.floor(fi)%n, hi=(lo+1)%n, fr=fi-Math.floor(fi);
+    return[Math.round(PAL[lo][0]+(PAL[hi][0]-PAL[lo][0])*fr),
+           Math.round(PAL[lo][1]+(PAL[hi][1]-PAL[lo][1])*fr),
+           Math.round(PAL[lo][2]+(PAL[hi][2]-PAL[lo][2])*fr)];}
+
+  function mandel(cx,cy){
+    var zx=0,zy=0,i=0;
+    while(zx*zx+zy*zy<4&&i<MAX_ITER){var t=zx*zx-zy*zy+cx;zy=2*zx*zy+cy;zx=t;i++;}
+    if(i===MAX_ITER)return -1;
+    return i+1-Math.log2(Math.log2(Math.max(Math.sqrt(zx*zx+zy*zy),1)));}
+
+  function coord(px,py,W,H){var sc=2.5/ZOOM,asp=W/H;
+    return[CX+(px/W-0.5)*sc*asp, CY+(py/H-0.5)*sc];}
+
+  var iters=null,renderDone=false,paletteOffset=0,tgt=0,blockSize=8,row=0;
+
+  function renderPass(){
+    var W=cv.width,H=cv.height;
+    if(!iters||iters.length!==W*H){iters=new Float32Array(W*H).fill(-2);}
+    for(var r=0;r<4;r++){
+      if(row>=H){
+        if(blockSize>1){blockSize=Math.max(1,blockSize>>1);row=0;requestAnimationFrame(renderPass);}
+        else{renderDone=true;requestAnimationFrame(animateColors);}
+        return;}
+      for(var x=0;x<W;x+=blockSize){
+        if(iters[row*W+x]===-2||blockSize===1){
+          var c=coord(x+blockSize/2,row+blockSize/2,W,H); iters[row*W+x]=mandel(c[0],c[1]);}
+        var v=iters[row*W+x];
+        if(v<0){ctx.fillStyle='#050316';}
+        else{var col=palColor(((v/MAX_ITER+paletteOffset)%1+1)%1);
+             ctx.fillStyle='rgb('+col[0]+','+col[1]+','+col[2]+')';}
+        ctx.fillRect(x,row,Math.min(blockSize,W-x),Math.min(blockSize,H-row));}
+      row+=blockSize;}
+    requestAnimationFrame(renderPass);}
+
+  function animateColors(ts){
+    if(!renderDone)return;
+    var W=cv.width,H=cv.height;
+    tgt=(ts*0.000035)%1; paletteOffset+=(tgt-paletteOffset)*0.04;
+    if(paletteOffset<0)paletteOffset+=1;
+    var img=ctx.createImageData(W,H);
+    for(var i=0;i<W*H;i++){
+      var v=iters[i],idx=i*4;
+      if(v<0){img.data[idx]=5;img.data[idx+1]=3;img.data[idx+2]=22;}
+      else{var col=palColor(((v/MAX_ITER+paletteOffset)%1+1)%1);
+           img.data[idx]=col[0];img.data[idx+1]=col[1];img.data[idx+2]=col[2];}
+      img.data[idx+3]=255;}
+    ctx.putImageData(img,0,0);
+    var g=ctx.createLinearGradient(0,H*0.52,0,H);
+    g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,0.78)');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    requestAnimationFrame(animateColors);}
+
+  function startRender(){iters=null;renderDone=false;blockSize=8;row=0;paletteOffset=0;
+    requestAnimationFrame(renderPass);}
+  startRender();
+})();
+</script>
+
+<script>
+(function(){
+  var commentpolicyLink = document.querySelector('.comment-policy-link');
+  if(commentpolicyLink){
+    commentpolicyLink.href = '../static/comment-policy.html?from=' + encodeURIComponent(window.location.href);
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,330 @@
+/* ================================================================
+   layout.css — Navigation, tags, footer, theme toggle, responsive.
+   All colors use CSS variables from base.css.
+   Tags are defined here ONLY — post.css imports this file.
+
+   HOW TO ADD A NAV LINK:
+     In index.html inside <ul class="nav-links">:
+     <li><a href="/posts?tag=X">Label</a></li>
+
+   HOW TO ADD A NEW TAG:
+     Copy any .tag-* block below, rename, change the three values.
+     Then use in HTML: <span class="tag tag-yourname">Label</span>
+================================================================ */
+
+/* ── STICKY NAV ──────────────────────────────────────────────
+   position:sticky + var(--z-nav) keeps this above everything
+   while still participating in normal document flow.           */
+#main-nav {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-nav);
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--sp-6);
+  background: var(--nav-bg);
+  border-bottom: 0.5px solid var(--border);
+  backdrop-filter: var(--nav-blur);
+  -webkit-backdrop-filter: var(--nav-blur);
+  transition: var(--t-color);
+}
+
+/* Site logo */
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  white-space: nowrap;
+  transition: color var(--t-base);
+}
+.nav-logo:hover { color: var(--text-2); }
+
+/* Desktop link list */
+.nav-links {
+  display: flex;
+  gap: var(--sp-5);
+  align-items: center;
+  list-style: none;
+}
+
+.nav-links a {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--text-3);
+  letter-spacing: 0.06em;
+  transition: color var(--t-base);
+}
+.nav-links a:hover { color: var(--text); }
+
+/* ── DARK MODE TOGGLE ─────────────────────────────────────────
+   A small button with a sun/moon SVG icon.
+   The icon swaps via CSS based on [data-theme].
+
+   TO MOVE OR STYLE: target #theme-toggle in your own overrides.*/
+#theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0.5px solid var(--border-2);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: color var(--t-base), border-color var(--t-base),
+              background var(--t-base);
+  flex-shrink: 0;
+}
+#theme-toggle:hover {
+  color: var(--text);
+  border-color: var(--border-3);
+  background: var(--bg-2);
+}
+
+/* ── MOBILE HAMBURGER ─────────────────────────────────────────
+   Pure CSS checkbox trick. The <label for="nav-toggle"> is the
+   visible icon. The checkbox itself is hidden.
+
+   The three <span> inside .nav-hamburger become the X on open.  */
+#nav-toggle { display: none; }
+
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  padding: var(--sp-2);
+  width: 32px;
+  height: 32px;
+}
+
+.nav-hamburger span {
+  display: block;
+  width: 18px;
+  height: 1.5px;
+  background: var(--text);
+  border-radius: 1px;
+  transition: transform var(--t-base), opacity var(--t-base);
+  transform-origin: center;
+}
+
+/* Hamburger → X when checked */
+#nav-toggle:checked ~ .nav-hamburger span:nth-child(1) {
+  transform: translateY(6.5px) rotate(45deg);
+}
+#nav-toggle:checked ~ .nav-hamburger span:nth-child(2) {
+  opacity: 0;
+}
+#nav-toggle:checked ~ .nav-hamburger span:nth-child(3) {
+  transform: translateY(-6.5px) rotate(-45deg);
+}
+
+/* ── PILL BUTTON ──────────────────────────────────────────────
+   Used as CTA buttons (Start reading →, etc.)
+   Has a subtle double-border effect via ::before pseudo-element. */
+.btn-pill {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  border: 1px solid var(--border-2);
+  background: transparent;
+  padding: 6px 20px;
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+  transition: color var(--t-base), border-color var(--t-base),
+              background var(--t-base);
+}
+
+.btn-pill::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 0.5px solid var(--border);
+  border-radius: 3px;
+  pointer-events: none;
+  transition: border-color var(--t-base);
+}
+
+.btn-pill:hover {
+  background: var(--bg-2);
+  color: var(--text);
+  border-color: var(--border-3);
+}
+.btn-pill:hover::before { border-color: var(--border-2); }
+
+/* ════════════════════════════════════════════════════════════
+   MATH TOPIC TAGS — defined here ONLY (not in post.css).
+   Three values per tag: background, color, border.
+
+   TO ADD A NEW TAG:
+     .tag-yourname {
+       background: rgba(R, G, B, 0.45);
+       color: #hexcode;          -- dark enough to read on bg
+       border: 0.5px solid rgba(R, G, B, 0.28);
+     }
+
+   Dark mode: override each .tag-* inside [data-theme="dark"]
+   at the bottom of this file.
+════════════════════════════════════════════════════════════ */
+
+.tag {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 12px;
+  border-radius: 2px;
+  transition: var(--t-color);
+}
+
+/* Analysis — cool blue */
+.tag-analysis {
+  background: rgba(200, 215, 240, 0.45);
+  color: #1a3a5c;
+  border: 0.5px solid rgba(80, 120, 190, 0.30);
+}
+
+/* Algebra — soft purple */
+.tag-algebra {
+  background: rgba(215, 205, 238, 0.45);
+  color: #3a2870;
+  border: 0.5px solid rgba(110, 90, 190, 0.28);
+}
+
+/* Topology — terracotta */
+.tag-topology {
+  background: rgba(238, 210, 200, 0.45);
+  color: #5a2015;
+  border: 0.5px solid rgba(180, 90, 70, 0.28);
+}
+
+/* Geometry — sage */
+.tag-geometry {
+  background: rgba(185, 215, 195, 0.45);
+  color: #1a4030;
+  border: 0.5px solid rgba(70, 150, 110, 0.28);
+}
+
+/* Number Theory — amber */
+.tag-number-theory {
+  background: rgba(250, 232, 200, 0.55);
+  color: #4a2e04;
+  border: 0.5px solid rgba(180, 120, 40, 0.30);
+}
+
+/* Logic — olive */
+.tag-logic {
+  background: rgba(215, 220, 195, 0.45);
+  color: #2e3a18;
+  border: 0.5px solid rgba(100, 120, 60, 0.28);
+}
+
+/* Probability — dusty rose */
+.tag-probability {
+  background: rgba(235, 205, 220, 0.45);
+  color: #4a1030;
+  border: 0.5px solid rgba(170, 70, 120, 0.28);
+}
+
+/* Marginal Notes — warm parchment/sepia, visually distinct from all math tags */
+.tag-notes {
+  background: rgba(238, 224, 200, 0.50);
+  color: #4e3010;
+  border: 0.5px solid rgba(150, 95, 35, 0.30);
+}
+
+/* ── DARK MODE TAG OVERRIDES ── */
+[data-theme="dark"] .tag-analysis     { background: rgba(10,28,65,0.65);  color: #7aaae0; border-color: rgba(70,120,210,0.32); }
+[data-theme="dark"] .tag-algebra      { background: rgba(28,10,65,0.65);  color: #a888e0; border-color: rgba(110,70,210,0.32); }
+[data-theme="dark"] .tag-topology     { background: rgba(65,18,10,0.65);  color: #e08870; border-color: rgba(200,80,55,0.32); }
+[data-theme="dark"] .tag-geometry     { background: rgba(6,38,18,0.65);   color: #60c080; border-color: rgba(50,150,90,0.32); }
+[data-theme="dark"] .tag-number-theory{ background: rgba(50,28,4,0.65);   color: #e0a850; border-color: rgba(190,130,35,0.32); }
+[data-theme="dark"] .tag-logic        { background: rgba(20,28,8,0.65);   color: #98b060; border-color: rgba(110,135,50,0.32); }
+[data-theme="dark"] .tag-probability  { background: rgba(55,8,30,0.65);   color: #e070a8; border-color: rgba(195,60,120,0.32); }
+[data-theme="dark"] .tag-notes        { background: rgba(55,32,8,0.65);   color: #d4a060; border-color: rgba(170,110,35,0.32); }
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--sp-4) var(--sp-6) var(--sp-5);
+  margin-top: auto;
+  transition: var(--t-color);
+}
+
+.footer-quote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.68);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+
+.footer-links {
+  display: flex;
+  gap: var(--sp-4);
+}
+
+.footer-links a {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.60);
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  transition: color var(--t-base);
+}
+.footer-links a:hover { color: rgba(255, 255, 255, 0.95); }
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  #main-nav {
+    padding: 0 var(--sp-4);
+    flex-wrap: wrap;
+    height: auto;
+    min-height: var(--nav-h);
+  }
+
+  .nav-hamburger { display: flex; }
+
+  /* Nav collapses into a vertical drawer */
+  .nav-links {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: var(--sp-2) 0 var(--sp-3);
+    border-top: 0.5px solid var(--border);
+    margin-top: var(--sp-2);
+  }
+
+  /* Show drawer when checkbox checked */
+  #nav-toggle:checked ~ .nav-links { display: flex; }
+
+  .nav-links li { width: 100%; }
+  .nav-links a {
+    display: block;
+    padding: var(--sp-3) 0;
+    font-size: 13px;
+    border-bottom: 0.5px solid var(--border);
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-logo { font-size: 18px; }
+  .footer { flex-direction: column; gap: var(--sp-3);
+            text-align: center; padding: var(--sp-4); }
+}
