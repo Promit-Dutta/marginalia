@@ -502,7 +502,7 @@ def sitemap():
 @app.route("/feed.xml")
 def rss_feed():
     posts  = get_posts()
-    domain = "https://YOUR_DOMAIN"   # ← replace with your real domain
+    domain = "https://promit-dutta.github.io/marginalia/"   # ← replace with your real domain
     items  = ""
     for p in posts:
         items += f"""
@@ -563,7 +563,7 @@ def build_static():
         python server.py --build
     """
     posts  = get_posts()
-    domain = "https://YOUR_DOMAIN"   # ← replace once deployed
+    domain = "https://promit-dutta.github.io/marginalia/"   # ← replace once deployed
 
     html_out = os.path.join(BASE_DIR, "posts.html")
     with open(html_out, "w", encoding="utf-8") as f:

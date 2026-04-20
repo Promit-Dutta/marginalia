@@ -2,10 +2,10 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Marginalia</title>
-    <link>https://YOUR_DOMAIN/</link>
+    <link>https://promit-dutta.github.io/marginalia//</link>
     <description>A personal mathematics blog — analysis, algebra, topology, number theory, and logic.</description>
     <language>en</language>
-    <atom:link href="https://YOUR_DOMAIN/feed.xml" rel="self" type="application/rss+xml"/>
+    <atom:link href="https://promit-dutta.github.io/marginalia//feed.xml" rel="self" type="application/rss+xml"/>
     
   </channel>
 </rss>
