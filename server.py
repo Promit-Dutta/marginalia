@@ -222,6 +222,8 @@ def build_listing_html(posts):
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>All Essays — Marginalia</title>
+  <meta name="description" content="All essays on Marginalia — a mathematics blog by Promit Dutta covering analysis, algebra, topology, number theory, and logic."/>
+  <link rel="canonical" href="https://promit-dutta.github.io/marginalia/posts.html"/>
   <script>
     (function(){{
       var s=localStorage.getItem('mg-theme');
@@ -563,7 +565,7 @@ def build_static():
         python server.py --build
     """
     posts  = get_posts()
-    domain = "https://promit-dutta.github.io/marginalia"   # ← replace once deployed
+    domain = "https://promit-dutta.github.io/marginalia"   # your GitHub Pages domain
 
     html_out = os.path.join(BASE_DIR, "posts.html")
     with open(html_out, "w", encoding="utf-8") as f:
@@ -595,7 +597,7 @@ def build_static():
     with open(feed_out, "w", encoding="utf-8") as f:
         f.write(feed_xml)
     print(f"  feed.xml     — {len(posts)} item(s)")
-    print(f"\n  Remember to replace YOUR_DOMAIN in server.py once deployed.")
+    print(f"\n  Domain is set to promit-dutta.github.io/marginalia — run --build to regenerate posts.html and feed.xml.")
     print("  Commit both files and push for GitHub Pages.\n")
 
 
