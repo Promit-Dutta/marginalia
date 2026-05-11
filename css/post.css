@@ -298,6 +298,25 @@ body.post-page {
   background: var(--post-bg);
 }
 
+/* Problem */
+.problem-box {
+  border: 0.5px solid var(--def-border);
+  background: var(--def-bg);
+}
+.problem-box::before {
+  color: var(--def-label);
+  background: var(--post-bg);
+}
+
+/* Conclusion*/
+.conclusion-box {
+  border: 0.5px solid var(--thm-border);
+  background: var(--thm-bg);
+}
+.conclusion-box::before {
+  color: var(--thm-label);
+  background: var(--post-bg);
+}
 /* Theorem */
 .theorem-box {
   border: 0.5px solid var(--thm-border);

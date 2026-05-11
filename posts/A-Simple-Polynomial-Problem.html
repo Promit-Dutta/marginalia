@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- Apply saved theme before first paint — prevents flash of wrong theme -->
+  <script>
+    (function(){
+      var s=localStorage.getItem('mg-theme');
+      var d=window.matchMedia('(prefers-color-scheme:dark)').matches;
+      document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));
+    })();
+  </script>
+  <title>A Simple Polynomial Problem — Marginalia</title>
+  <meta name="description" content="A proof that every real root of a non-negative polynomial must have even multiplicity. From the ISI BMath/BStat UGB 2026 entrance exam."/>
+  <meta property="og:title"       content="A Simple Polynomial Problem — Marginalia"/>
+  <meta property="og:description" content="A proof that every real root of a non-negative polynomial must have even multiplicity. From ISI BMath/BStat UGB 2026."/>
+  <meta property="og:type"        content="article"/>
+  <meta property="og:url"         content="https://promit-dutta.github.io/marginalia/posts/polynomial-problem.html"/>
+  <link rel="canonical"           href="https://promit-dutta.github.io/marginalia/posts/polynomial-problem.html"/>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=EB+Garamond:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400&display=swap"/>
+  <!-- KaTeX — required on every post page for math rendering.
+       Use $...$ for inline math, $$...$$ for display equations. -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"/>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{
+      delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],
+      throwOnError:false
+    })">
+  </script>
+  <link rel="stylesheet" href="../css/base.css"/>
+  <link rel="stylesheet" href="../css/layout.css"/>
+  <link rel="stylesheet" href="../css/post.css"/>
+</head>
+<body class="post-page">
+
+<nav class="post-nav">
+  <a href="../index.html" class="post-nav-logo">Marginalia</a>
+  <ul class="post-nav-links">
+    <li><a href="../posts.html">All essays</a></li>
+    <li><a href="../posts.html?tag=analysis">Analysis</a></li>
+    <li><a href="../posts.html?tag=algebra">Algebra</a></li>
+    <li><a href="../posts.html?tag=topology">Topology</a></li>
+    <li><a href="../index.html#about">About</a></li>
+  </ul>
+  <button id="theme-toggle" aria-label="Toggle dark mode">
+    <svg id="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+    <svg id="icon-sun" width="14" height="14" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" style="display:none">
+      <circle cx="12" cy="12" r="5"/>
+      <line x1="12" y1="1"  x2="12" y2="3"/>  <line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="4.22" y1="4.22"  x2="5.64"  y2="5.64"/>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+      <line x1="1"  y1="12" x2="3"  y2="12"/>  <line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="4.22" y1="19.78"  x2="5.64"  y2="18.36"/>
+      <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
+    </svg>
+  </button>
+</nav>
+
+<div class="post-hero">
+  <canvas id="hero-cv"></canvas>
+  <div class="post-hero-content">
+    <span class="tag tag-algebra">Algebra</span>
+    <h1 class="post-hero-title">A Simple Polynomial Problem</h1>
+  </div>
+</div>
+
+<main class="post-wrap">
+
+  <header class="post-header">
+    <div class="post-meta">
+      <span>May 12, 2026</span>
+      <span class="post-meta-dot">·</span>
+      <span>5 min read</span>
+      <span class="post-meta-dot">·</span>
+      <span>Promit Dutta</span>
+    </div>
+  </header>
+
+  <div class="post-body">
+
+    <p>
+      On 10th May 2026, this question appeared on the Indian Statistical Institute's
+      BMath &amp; BStat UGB entrance paper.
+    </p>
+
+    <h2>The question</h2>
+
+    <div class="problem-box">
+      <strong>Problem:</strong>
+      Let $P$ be a polynomial of degree $\geq 1$ with real coefficients such that
+      $P(x) \geq 0$ for all $x \in \mathbb{R}$.
+      Suppose $x_0 \in \mathbb{R}$ is such that $P(x_0) = 0$.
+      Show that there exist a positive integer $n$ and a polynomial $S$ with real coefficients such that
+      $S(x_0) \neq 0$ and
+      $$P(x) = (x - x_0)^{2n} S(x) \quad \text{for all } x \in \mathbb{R}$$
+    </div>
+
+    <h2>Solution</h2>
+
+    <p>
+      The first step is standard. By the division algorithm for polynomials, we can write
+      $$P(x) = (x - x_0)^{i}\, S(x)$$
+      where $S$ is a polynomial with real coefficients, $S(x_0) \neq 0$, and $i \geq 1$
+      is the multiplicity of the root $x_0$.
+    </p>
+
+    <p>
+      We must show that $i$ is an <em>even</em> positive integer.
+      For the sake of contradiction assume that $i = 2n + 1$ for some non-negative integer $n$, i.e. $i$ is odd.
+      Then
+      $$P(x) = (x - x_0)^{2n+1} S(x) = (x - x_0)^{2n}(x - x_0)\, S(x).$$
+    </p>
+
+    <p>
+      We examine the one-sided limits of $P(x)$ as $x \to x_0$.
+    </p>
+
+    <p>
+      Since $P(x) \geq 0$ for all $x \in \mathbb{R}$ and $(x - x_0)^{2n} \geq 0$ always, the sign of
+      $(x - x_0)\, S(x)$ determines the sign of $P(x)$ near $x_0$.
+    </p>
+
+    <p>
+      As $x \to x_0^+$, we have $(x - x_0) > 0$. Since $P(x) \geq 0$, the factor $S(x)$
+      must satisfy $\lim_{x \to x_0^+}S(x) \geq 0$. By continuity of $S$,
+      $$S(x_0) \geq 0.$$
+    </p>
+
+    <p>
+      As $x \to x_0^-$, we have $(x - x_0) < 0$. Since $P(x) \geq 0$, the factor $S(x)$
+      must satisfy $\lim_{x \to x_0^-}S(x) \leq 0$. By continuity of $S$,
+      $$S(x_0) \leq 0.$$
+    </p>
+
+    <p>
+      Combining these two inequalities, $S(x_0) = 0$, which contradicts $S(x_0) \neq 0$.
+    </p>
+
+    <div class="conclusion-box">
+      <strong>Conclusion:</strong>
+      The multiplicity $i$ of $x_0$ must be even. Writing $i = 2n$ for some positive integer $n$,
+      we obtain $P(x) = (x - x_0)^{2n} S(x)$ with $S(x_0) \neq 0$. $\square$
+    </div>
+
+    <div class="note-box">
+      This is Part (a) of the question as it appeared on the exam paper. Part (b) will be added
+      to this post shortly.
+    </div>
+
+  </div>
+
+  <nav class="post-footer" aria-label="Post navigation">
+    <a href="../posts.html">← All essays</a>
+    <a href="../posts.html">Next essay →</a>
+  </nav>
+
+</main>
+
+<section class="comments-section" id="comments">
+  <h2 class="comments-header">Discussion</h2>
+
+  <p class="comment-subtitle">
+    Comments are public and linked to your GitHub account.
+    Math works here — use <code>$...$</code> for inline and
+    <code>$$...$$</code> for display equations.
+    Please keep discussion constructive and on-topic.
+    <a href="../static/comment-policy.html"
+       class="comment-policy-link"
+       target="_blank" rel="noopener noreferrer">Comment policy →</a>
+  </p>
+
+  <div id="giscus-container"></div>
+  <script>
+  (function(){
+    var t   = document.documentElement.getAttribute('data-theme');
+    var gTh = (t === 'dark') ? 'dark_dimmed' : 'light';
+    var s   = document.createElement('script');
+    s.src   = 'https://giscus.app/client.js';
+    s.setAttribute('data-repo',              'Promit-Dutta/marginalia');
+    s.setAttribute('data-repo-id',           'R_kgDOSCWm-w');
+    s.setAttribute('data-category',          'General');
+    s.setAttribute('data-category-id',       'DIC_kwDOSCWm-84C7Nlg');
+    s.setAttribute('data-mapping',           'pathname');
+    s.setAttribute('data-strict',            '0');
+    s.setAttribute('data-reactions-enabled', '1');
+    s.setAttribute('data-emit-metadata',     '0');
+    s.setAttribute('data-input-position',    'bottom');
+    s.setAttribute('data-theme',             gTh);
+    s.setAttribute('data-lang',              'en');
+    s.setAttribute('data-loading',           'lazy');
+    s.setAttribute('crossorigin',            'anonymous');
+    s.async = true;
+    document.getElementById('giscus-container').appendChild(s);
+  })();
+  </script>
+</section>
+
+<footer class="site-footer">
+  <span class="site-footer-brand">Marginalia — a mathematics notebook</span>
+  <div class="site-footer-links">
+    <a href="../feed.xml">RSS</a>
+    <a href="../index.html">Home</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  function syncIcon(t){
+    var m=document.getElementById('icon-moon'), s=document.getElementById('icon-sun');
+    if(!m||!s) return;
+    m.style.display = t==='dark' ? 'none'  : 'block';
+    s.style.display = t==='dark' ? 'block' : 'none';
+  }
+  syncIcon(document.documentElement.getAttribute('data-theme'));
+  document.getElementById('theme-toggle').addEventListener('click', function(){
+    var curr = document.documentElement.getAttribute('data-theme');
+    var next = curr==='dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('mg-theme', next);
+    syncIcon(next);
+    var gf = document.querySelector('.giscus-frame');
+    if(gf){
+      gf.contentWindow.postMessage(
+        {giscus:{setConfig:{theme: next==='dark' ? 'dark_dimmed' : 'light'}}},
+        'https://giscus.app'
+      );
+    }
+  });
+})();
+</script>
+<script>
+(function(){
+  var cv=document.getElementById('hero-cv'), ctx=cv.getContext('2d');
+  function resize(){cv.width=cv.offsetWidth||cv.parentElement.offsetWidth;cv.height=cv.offsetHeight||340;}
+  resize(); window.addEventListener('resize',function(){resize();init();});
+
+  var MAX_ITER=160;
+  var PAL=[[10,0,40],[25,5,80],[50,15,130],[80,40,180],[120,80,220],
+           [80,160,200],[40,200,180],[20,220,160],[60,210,100],[140,220,60],
+           [220,200,30],[240,160,20],[220,110,15],[180,65,10],[120,30,5],[50,5,20]];
+
+  function palColor(t){var n=PAL.length,fi=t*(n-1),lo=Math.floor(fi)%n,hi=(lo+1)%n,fr=fi-Math.floor(fi);
+    return[Math.round(PAL[lo][0]+(PAL[hi][0]-PAL[lo][0])*fr),
+           Math.round(PAL[lo][1]+(PAL[hi][1]-PAL[lo][1])*fr),
+           Math.round(PAL[lo][2]+(PAL[hi][2]-PAL[lo][2])*fr)];}
+
+  function julia(zx,zy,cx,cy){var i=0;
+    while(zx*zx+zy*zy<4&&i<MAX_ITER){var t=zx*zx-zy*zy+cx;zy=2*zx*zy+cy;zx=t;i++;}
+    if(i===MAX_ITER)return -1;
+    return i+1-Math.log2(Math.log2(Math.max(Math.sqrt(zx*zx+zy*zy),1)));}
+
+  var iters=null,buf=null,W=0,H=0,lastCx=-999,lastCy=-999,offset=0;
+
+  function init(){W=cv.width;H=cv.height;iters=new Float32Array(W*H);buf=ctx.createImageData(W,H);}
+  init();
+
+  function getC(ts){var t=ts*0.00020; return[-0.4+0.4*Math.cos(t),-0.3+0.35*Math.sin(2*t)];}
+
+  function draw(ts){
+    var c=getC(ts), ncx=c[0], ncy=c[1];
+    if(Math.abs(ncx-lastCx)>0.001||Math.abs(ncy-lastCy)>0.001){
+      lastCx=ncx;lastCy=ncy;var sc=1.6;
+      for(var y=0;y<H;y++)for(var x=0;x<W;x++){
+        iters[y*W+x]=julia((x/W-0.5)*2*sc*(W/H),(y/H-0.5)*2*sc,ncx,ncy);}}
+
+    offset=(ts*0.000038)%1;
+    for(var i=0;i<W*H;i++){var v=iters[i],idx=i*4;
+      if(v<0){buf.data[idx]=4;buf.data[idx+1]=0;buf.data[idx+2]=18;}
+      else{var col=palColor(((v/MAX_ITER+offset)%1+1)%1);
+           buf.data[idx]=col[0];buf.data[idx+1]=col[1];buf.data[idx+2]=col[2];}
+      buf.data[idx+3]=255;}
+    ctx.putImageData(buf,0,0);
+
+    var g=ctx.createLinearGradient(0,H*0.52,0,H);
+    g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,0.78)');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    requestAnimationFrame(draw);}
+  requestAnimationFrame(draw);
+})();
+</script>
+<script>
+(function(){
+  var commentpolicyLink = document.querySelector('.comment-policy-link');
+  if(cpLink){
+    commentpolicyLink.href = '../static/comment-policy.html?from=' + encodeURIComponent(window.location.href);
+  }
+})();
+</script>
+
+</body>
+</html>
