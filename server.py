@@ -129,6 +129,18 @@ def get_posts():
         )
         date_str = meta_m.group(1).strip() if meta_m else ""
 
+        # Convert "Month DD, YYYY" → RFC-822 format required by RSS 2.0 spec.
+        # e.g. "May 12, 2026" → "Tue, 12 May 2026 00:00:00 +0000"
+        # Falls back to the raw string if parsing fails (won't break the feed,
+        # just won't validate — better than crashing).
+        rfc822_date = date_str
+        try:
+            from datetime import datetime
+            dt = datetime.strptime(date_str, "%B %d, %Y")
+            rfc822_date = dt.strftime("%a, %d %b %Y 00:00:00 +0000")
+        except (ValueError, ImportError):
+            pass  # keep raw date_str as fallback
+
         # Read time — estimated from post-body word count at 200 wpm
         body_m = re.search(r'class="post-body"[^>]*>(.*?)</div>', src, re.S | re.I)
         read_time = ""
@@ -146,13 +158,14 @@ def get_posts():
                 excerpt = excerpt[:175].rsplit(" ", 1)[0] + "…"
 
         posts.append({
-            "slug":      fname.replace(".html", ""),
-            "title":     title,
-            "tag_class": tag_class,
-            "tag_label": tag_label,
-            "date":      date_str,
-            "read_time": read_time,
-            "excerpt":   excerpt,
+            "slug":       fname.replace(".html", ""),
+            "title":      title,
+            "tag_class":  tag_class,
+            "tag_label":  tag_label,
+            "date":       date_str,       # "May 12, 2026"  — used in card UI
+            "rfc822_date": rfc822_date,   # "Tue, 12 May 2026 00:00:00 +0000" — used in RSS
+            "read_time":  read_time,
+            "excerpt":    excerpt,
         })
 
     return posts
@@ -504,7 +517,7 @@ def sitemap():
 @app.route("/feed.xml")
 def rss_feed():
     posts  = get_posts()
-    domain = "https://promit-dutta.github.io/marginalia"   # ← replace with your real domain
+    domain = "https://YOUR_DOMAIN"   # ← replace with your real domain
     items  = ""
     for p in posts:
         items += f"""
@@ -512,7 +525,7 @@ def rss_feed():
       <title><![CDATA[{p['title']}]]></title>
       <link>{domain}/posts/{p['slug']}.html</link>
       <description><![CDATA[{p['excerpt']}]]></description>
-      <pubDate>{p['date']}</pubDate>
+      <pubDate>{p['rfc822_date']}</pubDate>
       <guid isPermaLink="true">{domain}/posts/{p['slug']}.html</guid>
     </item>"""
     xml = f"""<?xml version="1.0" encoding="UTF-8"?>
@@ -579,7 +592,7 @@ def build_static():
       <title><![CDATA[{p['title']}]]></title>
       <link>{domain}/posts/{p['slug']}.html</link>
       <description><![CDATA[{p['excerpt']}]]></description>
-      <pubDate>{p['date']}</pubDate>
+      <pubDate>{p['rfc822_date']}</pubDate>
       <guid isPermaLink="true">{domain}/posts/{p['slug']}.html</guid>
     </item>"""
     feed_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
