@@ -8,6 +8,14 @@
     <atom:link href="https://promit-dutta.github.io/marginalia/feed.xml" rel="self" type="application/rss+xml"/>
     
     <item>
+      <title><![CDATA[A Functional Equation]]></title>
+      <link>https://promit-dutta.github.io/marginalia/posts/functional_equation_problem.html</link>
+      <description><![CDATA[This problem is from the ISI BMath and BStat 2026 UGB question paper,
+      like the polynomial problem I posted previously.]]></description>
+      <pubDate>05 27, 2026</pubDate>
+      <guid isPermaLink="true">https://promit-dutta.github.io/marginalia/posts/functional_equation_problem.html</guid>
+    </item>
+    <item>
       <title><![CDATA[A Simple Polynomial Problem]]></title>
       <link>https://promit-dutta.github.io/marginalia/posts/a-simple-polynomial-problem.html</link>
       <description><![CDATA[On 10th May 2026, this question appeared on the Indian Statistical Institute's
