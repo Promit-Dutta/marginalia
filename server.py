@@ -665,7 +665,7 @@ def build_problems_html(posts):
 
   <nav id="main-nav">
     <a href="index.html" class="nav-logo">Marginalia</a>
-    <input type="checkbox" id="nav-toggle"/>
+    <input type="checkbox" id="nav-toggle" autocomplete="off"/>
     <label for="nav-toggle" class="nav-hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
     </label>
