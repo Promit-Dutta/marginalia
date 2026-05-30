@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <!-- Apply saved theme before first paint — prevents flash of wrong theme -->
   <script>
     (function(){
       var s=localStorage.getItem('mg-theme');
@@ -11,13 +10,15 @@
       document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));
     })();
   </script>
+  <!-- CHANGE: post title and description -->
   <title>A Simple Polynomial Problem — Marginalia</title>
   <meta name="description" content="A proof that every real root of a non-negative polynomial must have even multiplicity. From the ISI BMath/BStat UGB 2026 entrance exam."/>
+  <!-- Open Graph — controls how the post looks when shared on social media -->
   <meta property="og:title"       content="A Simple Polynomial Problem — Marginalia"/>
   <meta property="og:description" content="A proof that every real root of a non-negative polynomial must have even multiplicity. From ISI BMath/BStat UGB 2026."/>
   <meta property="og:type"        content="article"/>
   <meta property="og:url"         content="https://promit-dutta.github.io/marginalia/posts/a-simple-polynomial-problem.html"/>
-  <link rel="canonical"           href="https://promit-dutta.github.io/marginalia/posts/a-simple-polynomial-problem.html"/>
+  <link rel="canonical" href="https://promit-dutta.github.io/marginalia/posts/a-simple-polynomial-problem.html"/>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -39,45 +40,100 @@
 </head>
 <body class="post-page">
 
-<nav class="post-nav">
-  <a href="../index.html" class="post-nav-logo">Marginalia</a>
-  <ul class="post-nav-links">
-    <li><a href="../posts.html">All essays</a></li>
-    <li><a href="../posts.html?tag=analysis">Analysis</a></li>
-    <li><a href="../posts.html?tag=algebra">Algebra</a></li>
-    <li><a href="../posts.html?tag=topology">Topology</a></li>
+<nav id="main-nav">
+  <a href="../index.html" class="nav-logo">Marginalia</a>
+
+  <input type="checkbox" id="nav-toggle"/>
+  <label for="nav-toggle" class="nav-hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </label>
+
+  <ul class="nav-links">
+
+    <li class="nav-has-dropdown">
+      <button class="nav-dropdown-btn" aria-haspopup="true" aria-expanded="false">
+        Essays
+        <svg class="nav-chevron" width="9" height="5" viewBox="0 0 9 5" fill="none" aria-hidden="true">
+          <path d="M1 1l3.5 3L8 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="nav-dropdown-panel">
+        <a href="../posts.html" class="ndp-all">All essays</a>
+        <span class="ndp-label">By topic</span>
+        <a href="../posts.html?tag=analysis">Analysis</a>
+        <a href="../posts.html?tag=algebra">Algebra</a>
+        <a href="../posts.html?tag=topology">Topology</a>
+        <a href="../posts.html?tag=geometry">Geometry</a>
+        <a href="../posts.html?tag=number-theory">Number Theory</a>
+        <a href="../posts.html?tag=logic">Logic</a>
+        <a href="../posts.html?tag=probability">Probability</a>
+      </div>
+    </li>
+
+    <li class="nav-has-dropdown">
+      <button class="nav-dropdown-btn" aria-haspopup="true" aria-expanded="false">
+        Problems
+        <svg class="nav-chevron" width="9" height="5" viewBox="0 0 9 5" fill="none" aria-hidden="true">
+          <path d="M1 1l3.5 3L8 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="nav-dropdown-panel">
+        <a href="../problems.html" class="ndp-all">All problems</a>
+        <span class="ndp-label">By source</span>
+        <a href="../problems.html?source=isi-cmi">ISI / CMI</a>
+        <a href="../problems.html?source=olympiad">Olympiads</a>
+        <a href="../problems.html?source=putnam">Putnam</a>
+      </div>
+    </li>
+
+    <li><a href="../notes.html">Marginal Notes</a></li>
     <li><a href="../index.html#about">About</a></li>
+
   </ul>
-  <button id="theme-toggle" aria-label="Toggle dark mode">
-    <svg id="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+
+  <button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+    <svg id="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
     </svg>
     <svg id="icon-sun" width="14" height="14" viewBox="0 0 24 24"
          fill="none" stroke="currentColor" stroke-width="2"
-         stroke-linecap="round" stroke-linejoin="round" style="display:none">
+         stroke-linecap="round" stroke-linejoin="round"
+         style="display:none" aria-hidden="true">
       <circle cx="12" cy="12" r="5"/>
-      <line x1="12" y1="1"  x2="12" y2="3"/>  <line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="12" y1="1"  x2="12" y2="3"/>
+      <line x1="12" y1="21" x2="12" y2="23"/>
       <line x1="4.22" y1="4.22"  x2="5.64"  y2="5.64"/>
       <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-      <line x1="1"  y1="12" x2="3"  y2="12"/>  <line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="1"  y1="12" x2="3"  y2="12"/>
+      <line x1="21" y1="12" x2="23" y2="12"/>
       <line x1="4.22" y1="19.78"  x2="5.64"  y2="18.36"/>
       <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
     </svg>
   </button>
 </nav>
 
+<!-- ══ POST HERO ════════════════════════════════════════════════
+     Julia Set — c parameter drifts on a lemniscate, set morphs live.
+     The title text (.post-hero-content) is always on top.
+
+     TO CHANGE THE TITLE:  edit the tag span and h1 heading below.
+     TO CHANGE THE REGION: see TUNABLE constants in the script at the end.
+════════════════════════════════════════════════════════════════ -->
 <div class="post-hero">
   <canvas id="hero-cv"></canvas>
+  <!-- CHANGE: tag class + post title -->
   <div class="post-hero-content">
-    <span class="tag tag-algebra">Algebra</span>
+    <span class="tag tag-isi-cmi">ISI / CMI</span>
     <h1 class="post-hero-title">A Simple Polynomial Problem</h1>
   </div>
 </div>
 
+<!-- ══ ARTICLE ══════════════════════════════════════════════════ -->
 <main class="post-wrap">
 
   <header class="post-header">
     <div class="post-meta">
+      <!-- CHANGE: date and read time -->
       <span>May 12, 2026</span>
       <span class="post-meta-dot">·</span>
       <span>5 min read</span>
@@ -86,6 +142,21 @@
     </div>
   </header>
 
+  <!-- ══ POST BODY ═══════════════════════════════════════════════
+       QUICK REFERENCE:
+         Inline math      → $e^{i\pi}+1=0$
+         Display math     → $$\int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}$$
+                            (own paragraph, blank lines above and below)
+         Section heading  → <h2>Title</h2>
+         Sub-section      → <h3>Title</h3>
+         Definition box   → <div class="definition-box"><strong>Definition.</strong> …</div>
+         Theorem box      → <div class="theorem-box"><strong>Theorem.</strong> …</div>
+         Note / remark    → <div class="note-box">…</div>
+         Pull quote       → <div class="pull-quote">…</div>
+         Inline code      → <code>f(x)</code>
+         Drop cap         → automatic on the first paragraph in .post-body
+         New box type     → copy .theorem-box in post.css, rename, change ::before content
+  ════════════════════════════════════════════════════════════════ -->
   <div class="post-body">
 
     <p>
@@ -95,7 +166,7 @@
 
     <h2>The question</h2>
 
-    <div class="problem-box">
+   <div class="problem-box">
       <strong>Problem:</strong>
       Let $P$ be a polynomial of degree $\geq 1$ with real coefficients such that
       $P(x) \geq 0$ for all $x \in \mathbb{R}$.
@@ -114,7 +185,7 @@
       is the multiplicity of the root $x_0$.
     </p>
 
-    <p>
+        <p>
       We must show that $i$ is an <em>even</em> positive integer.
       For the sake of contradiction assume that $i = 2n + 1$ for some non-negative integer $n$, i.e. $i$ is odd.
       Then
@@ -159,6 +230,7 @@
 
   </div>
 
+  <!-- CHANGE: update href values when prev/next posts exist -->
   <nav class="post-footer" aria-label="Post navigation">
     <a href="../posts.html">← All essays</a>
     <a href="../posts.html">Next essay →</a>
@@ -166,6 +238,18 @@
 
 </main>
 
+<!-- ══ COMMENTS ════════════════════════════════════════════════
+     Powered by Giscus (GitHub Discussions).
+     Commenters can write $inline$ or $$display$$ math directly
+     in their comment — GitHub renders it automatically.
+
+     SETUP (one-time, ~10 minutes):
+       1. Push this repo to GitHub (public)
+       2. Repo → Settings → Features → check Discussions
+       3. Install Giscus app: github.com/apps/giscus
+       4. Get your config at giscus.app
+       5. Replace the four YOUR_* values in the script below.
+════════════════════════════════════════════════════════════════ -->
 <section class="comments-section" id="comments">
   <h2 class="comments-header">Discussion</h2>
 
@@ -179,6 +263,8 @@
        target="_blank" rel="noopener noreferrer">Comment policy →</a>
   </p>
 
+  <!-- Giscus injected dynamically so the initial theme matches localStorage -->
+  <!-- REPLACE the four YOUR_* values below with your own from giscus.app -->
   <div id="giscus-container"></div>
   <script>
   (function(){
@@ -213,6 +299,7 @@
   </div>
 </footer>
 
+<!-- Dark mode + Giscus theme sync -->
 <script>
 (function(){
   function syncIcon(t){
@@ -238,6 +325,17 @@
   });
 })();
 </script>
+
+<!-- ══ JULIA SET ANIMATION ══════════════════════════════════════
+     The Julia set for f(z) = z² + c where c drifts slowly
+     along a lemniscate, causing the set to morph continuously.
+     The palette cycles independently for a living, breathing feel.
+
+     TUNABLE:
+       PALETTE_SPEED  — color cycle rate (0.000038 = slow)
+       C_SPEED        — how fast c parameter drifts (0.00020)
+       MAX_ITER       — render detail level (160)
+════════════════════════════════════════════════════════════════ -->
 <script>
 (function(){
   var cv=document.getElementById('hero-cv'), ctx=cv.getContext('2d');
@@ -288,14 +386,18 @@
   requestAnimationFrame(draw);
 })();
 </script>
+
+<!-- Pass current URL to comment-policy so "Back to essay" returns here.
+     The policy page opens in a new tab so browser history is unavailable. -->
 <script>
 (function(){
   var commentpolicyLink = document.querySelector('.comment-policy-link');
-  if(cpLink){
+  if(commentpolicyLink){
     commentpolicyLink.href = '../static/comment-policy.html?from=' + encodeURIComponent(window.location.href);
   }
 })();
 </script>
 
+<script src="../js/nav-dropdown.js"></script>
 </body>
 </html>
