@@ -447,7 +447,7 @@
 
   /* Override the old display:none drawer — slide-in panel from right */
   #main-nav ul.nav-links {
-    display: flex !important;
+    display: flex;
     position: fixed;
     top: 0;
     right: 0;
@@ -465,18 +465,26 @@
     border-left: 0.5px solid var(--border);
     box-shadow: -8px 0 32px rgba(0, 0, 0, 0.12);
     transform: translateX(100%);
-    transition: transform 0.28s ease;
-    z-index: calc(var(--z-nav) - 1);
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.28s ease, visibility 0s 0.28s;
+    z-index: calc(var(--z-nav, 200) - 1);
     overflow-y: auto;
   }
 
   /* PRIMARY: JS adds .nav-open to #main-nav to slide panel in */
   #main-nav.nav-open ul.nav-links {
     transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+    transition: transform 0.28s ease, visibility 0s 0s;
   }
   /* FALLBACK: CSS-only for no-JS environments */
   #nav-toggle:checked ~ ul.nav-links {
     transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+    transition: transform 0.28s ease, visibility 0s 0s;
   }
 
   /* Plain links inside the panel */

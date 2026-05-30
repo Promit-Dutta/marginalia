@@ -38,6 +38,11 @@
     closeAll();
   }
 
+ /* ── Ensure closed state on initial DOM ready ─────────────── */
+  document.addEventListener('DOMContentLoaded', function () {
+    closeMobileNav();
+  });
+
   /* ── Reset on every page show (fixes bfcache restoration) ── */
   window.addEventListener('pageshow', function () {
     closeMobileNav();
