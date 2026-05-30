@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <!-- ─── CHANGE: update description as the page grows ─── -->
   <title>Marginal Notes — Marginalia</title>
   <meta name="description" content="A running notebook by Promit Dutta — current readings, half-formed thoughts, and the occasional mathematical tangent."/>
   <meta property="og:title"       content="Marginal Notes — Marginalia"/>
@@ -61,42 +60,6 @@
       flex-direction: column;
     }
 
-    /* ── Sticky nav ── */
-    .notes-nav {
-      position: sticky;
-      top: 0;
-      z-index: var(--z-nav);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 var(--sp-6);
-      height: var(--nav-h);
-      background: rgba(255,255,255,0.94);
-      border-bottom: 0.5px solid var(--post-border);
-      backdrop-filter: var(--nav-blur);
-      -webkit-backdrop-filter: var(--nav-blur);
-      transition: var(--t-color);
-    }
-    [data-theme="dark"] .notes-nav { background: rgba(9,18,7,0.96); }
-
-    .notes-nav-logo {
-      font-family: var(--font-display);
-      font-size: 18px; font-weight: 300; letter-spacing: 0.06em;
-      color: var(--post-text); transition: color var(--t-base);
-    }
-    .notes-nav-logo:hover { color: var(--text-2); }
-
-    .notes-nav-links {
-      display: flex; gap: var(--sp-5); list-style: none; align-items: center;
-    }
-    .notes-nav-links a {
-      font-family: var(--font-sans); font-size: 12px;
-      color: var(--post-text-3); letter-spacing: 0.06em;
-      transition: color var(--t-base);
-    }
-    .notes-nav-links a:hover  { color: var(--post-text); }
-    .notes-nav-links a.active { color: var(--post-text); }
-
     /* ── Main wrapper ── */
     .notes-wrap {
       max-width: 760px;
@@ -105,8 +68,7 @@
       flex: 1;
     }
 
-    /* ── Page header ──
-       Quieter than post heroes. This is a notebook, not a lecture. */
+    /* ── Page header ── */
     .notes-header {
       margin-bottom: var(--sp-7);
       padding-bottom: var(--sp-5);
@@ -146,8 +108,7 @@
       color: var(--post-text-3);
     }
 
-    /* ── Entry: two-column grid ──
-       Left (108px) = the margin  |  Right (1fr) = the page  */
+    /* ── Entry: two-column grid ── */
     .note-entry {
       display: grid;
       grid-template-columns: 108px 1fr;
@@ -158,12 +119,11 @@
     }
     .note-entry:last-child { border-bottom: none; }
 
-    /* Left column: date sits in the "margin" */
     .note-aside {
       text-align: right;
       border-right: 1px solid var(--post-border);
       padding-right: var(--sp-4);
-      padding-top: 4px;      /* optical alignment with first text baseline */
+      padding-top: 4px;
       transition: var(--t-color);
     }
 
@@ -195,7 +155,6 @@
       opacity: 0.65;
     }
 
-    /* Permalink anchor — visible on entry hover only */
     .note-permalink {
       display: block;
       margin-top: var(--sp-2);
@@ -210,10 +169,8 @@
     .note-entry:hover .note-permalink  { opacity: 0.5; }
     .note-permalink:hover              { opacity: 1 !important; }
 
-    /* Right column: content */
     .note-content { padding-left: var(--sp-2); }
 
-    /* Entry title — softer than post h2 */
     .note-title {
       font-family: var(--font-serif);
       font-size: 20px; font-weight: 400;
@@ -223,7 +180,6 @@
       letter-spacing: 0.01em;
     }
 
-    /* Body text — 17px, EB Garamond, comfortable line height */
     .note-text {
       font-family: var(--font-serif);
       font-size: 17px;
@@ -254,7 +210,6 @@
       transition: var(--t-color);
     }
 
-    /* Display equations: same accent as post pages */
     .note-text .katex-display {
       margin: var(--sp-5) 0 !important;
       overflow-x: auto;
@@ -265,7 +220,6 @@
       transition: var(--t-color);
     }
 
-    /* Blockquote — for quoted passages */
     .note-text blockquote {
       border-left: 2px solid var(--post-border);
       padding-left: var(--sp-5);
@@ -312,8 +266,6 @@
       .note-permalink  { display: none; }
       .note-content    { padding-left: 0; padding-top: var(--sp-3); }
 
-      .notes-nav-links { gap: var(--sp-3); }
-      .notes-nav-links a { font-size: 11px; }
       .notes-footer    { flex-direction: column; gap: var(--sp-2);
                          text-align: center; padding: var(--sp-4); }
     }
@@ -323,16 +275,59 @@
 <body class="notes-page">
 
 <!-- ══ STICKY NAV ════════════════════════════════════════════ -->
-<nav class="notes-nav">
-  <a href="index.html" class="notes-nav-logo">Marginalia</a>
-  <ul class="notes-nav-links">
-    <li><a href="posts.html">All essays</a></li>
-    <li><a href="posts.html?tag=analysis">Analysis</a></li>
-    <li><a href="posts.html?tag=algebra">Algebra</a></li>
-    <li><a href="posts.html?tag=topology">Topology</a></li>
+<nav id="main-nav">
+  <a href="index.html" class="nav-logo">Marginalia</a>
+
+  <input type="checkbox" id="nav-toggle" autocomplete="off"/>
+  <label for="nav-toggle" class="nav-hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </label>
+
+  <ul class="nav-links">
+
+    <!-- Essays dropdown -->
+    <li class="nav-has-dropdown">
+      <button class="nav-dropdown-btn" aria-haspopup="true" aria-expanded="false">
+        Essays
+        <svg class="nav-chevron" width="9" height="5" viewBox="0 0 9 5" fill="none" aria-hidden="true">
+          <path d="M1 1l3.5 3L8 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="nav-dropdown-panel">
+        <a href="posts.html" class="ndp-all">All essays</a>
+        <span class="ndp-label">By topic</span>
+        <a href="posts.html?tag=analysis">Analysis</a>
+        <a href="posts.html?tag=algebra">Algebra</a>
+        <a href="posts.html?tag=topology">Topology</a>
+        <a href="posts.html?tag=geometry">Geometry</a>
+        <a href="posts.html?tag=number-theory">Number Theory</a>
+        <a href="posts.html?tag=logic">Logic</a>
+        <a href="posts.html?tag=probability">Probability</a>
+      </div>
+    </li>
+
+    <!-- Problems dropdown (Phase 2 scaffold) -->
+    <li class="nav-has-dropdown">
+      <button class="nav-dropdown-btn" aria-haspopup="true" aria-expanded="false">
+        Problems
+        <svg class="nav-chevron" width="9" height="5" viewBox="0 0 9 5" fill="none" aria-hidden="true">
+          <path d="M1 1l3.5 3L8 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="nav-dropdown-panel">
+        <a href="problems.html" class="ndp-all">All problems</a>
+        <span class="ndp-label">By source</span>
+        <a href="problems.html?source=isi-cmi">ISI / CMI</a>
+        <a href="problems.html?source=olympiad">Olympiads</a>
+        <a href="problems.html?source=putnam">Putnam</a>
+      </div>
+    </li>
+
     <li><a href="notes.html" class="active">Marginal Notes</a></li>
     <li><a href="index.html#about">About</a></li>
+
   </ul>
+
   <button id="theme-toggle" aria-label="Toggle dark mode">
     <svg id="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
@@ -397,41 +392,26 @@
   ════════════════════════════════════════════════════════ -->
 
 <article class="note-entry" id="note-2026-05-28">
-         <aside class="note-aside">
-           <time class="note-date">Thursday 28</time>
-           <span class="note-year">2026</span>
-           <span class="note-time">09:40</span>
-           <a class="note-permalink" href="#note-YYYY-MM-DD" title="Link to entry">#</a>
-         </aside>
-         <div class="note-content">
-           <h3 class="note-title"></h3>
-           <div class="note-text">
-             <p>Recently I had been solving a few problems from the ISI BMATH & BSTAT exam 2026 paper(UGB), it was comparatively on the easier side 
-              of difficulty spectrum. I have posted two problems so far(A polynomial and a functional equation problem), and before I post more I feel
-              the need of a separate tag for such posts, So they don't get mixed with theoretical essays, which I haven't posted any yet.
-             </p>
-             
-             <p>I do enjoy problem solving, and will post solutions/problems from other exams that I will find interesting. Those will possibly
-              live in a separate section, which I will start building soon. 
-             </p>
-           </div>
-         </div>
-       </article>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  <aside class="note-aside">
+    <time class="note-date">Thursday 28</time>
+    <span class="note-year">2026</span>
+    <span class="note-time">09:40</span>
+    <a class="note-permalink" href="#note-2026-05-28" title="Link to entry">#</a>
+  </aside>
+  <div class="note-content">
+    <h3 class="note-title"></h3>
+    <div class="note-text">
+      <p>Recently I had been solving a few problems from the ISI BMATH & BSTAT exam 2026 paper(UGB), it was comparatively on the easier side 
+       of difficulty spectrum. I have posted two problems so far(A polynomial and a functional equation problem), and before I post more I feel
+       the need of a separate tag for such posts, So they don't get mixed with theoretical essays, which I haven't posted any yet.
+      </p>
+      
+      <p>I do enjoy problem solving, and will post solutions/problems from other exams that I will find interesting. Those will possibly
+       live in a separate section, which I will start building soon. 
+      </p>
+    </div>
+  </div>
+</article>
 
 
   <article class="note-entry" id="note-2026-04-20">
@@ -473,11 +453,6 @@
     </div>
   </article>
 
-
-  
-
-  
-
 </main>
 
 
@@ -492,7 +467,7 @@
 </footer>
 
 
-<!-- Dark mode toggle script — identical pattern to all other pages -->
+<!-- Dark mode toggle script -->
 <script>
 (function(){
   function syncIcon(t){
@@ -513,5 +488,6 @@
 })();
 </script>
 
+<script src="js/nav-dropdown.js"></script>
 </body>
 </html>

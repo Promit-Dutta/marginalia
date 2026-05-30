@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>All Essays — Marginalia</title>
-  <meta name="description" content="All essays on Marginalia — a mathematics blog by Promit Dutta covering analysis, algebra, topology, number theory, and logic."/>
-  <link rel="canonical" href="https://promit-dutta.github.io/marginalia/posts.html"/>
+  <title>Problems — Marginalia</title>
+  <meta name="description" content="Problem solutions on Marginalia — ISI, CMI, olympiads, and Putnam problems with full write-ups by Promit Dutta."/>
+  <link rel="canonical" href="https://promit-dutta.github.io/marginalia/problems.html"/>
   <script>
     (function(){
       var s=localStorage.getItem('mg-theme');
@@ -179,32 +179,44 @@
 
   <div class="listing-wrap">
     <div class="listing-header">
-      <h1 class="listing-title">All essays</h1>
-      <p class="listing-count">0 pieces so far</p>
+      <h1 class="listing-title">Problems</h1>
+      <p class="listing-count">2 solutions so far</p>
     </div>
 
     <div class="filter-row" id="filters">
       <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="tag-analysis">Analysis</button>
-      <button class="filter-btn" data-filter="tag-algebra">Algebra</button>
-      <button class="filter-btn" data-filter="tag-topology">Topology</button>
-      <button class="filter-btn" data-filter="tag-geometry">Geometry</button>
-      <button class="filter-btn" data-filter="tag-number-theory">Number Theory</button>
-      <button class="filter-btn" data-filter="tag-logic">Logic</button>
-      <button class="filter-btn" data-filter="tag-probability">Probability</button>
+      <button class="filter-btn" data-filter="tag-isi-cmi">ISI / CMI</button>
+      <button class="filter-btn" data-filter="tag-olympiad">Olympiads</button>
+      <button class="filter-btn" data-filter="tag-putnam">Putnam</button>
 
     </div>
 
     <div class="cards-grid" id="cards">
-      <p class="empty-msg">.</p>
+      
+        <div class="post-card" data-tag="tag-isi-cmi"
+             onclick="location.href='posts/functional_equation_problem.html'">
+          <span class="tag tag-isi-cmi">ISI / CMI</span>
+          <div class="pc-title">A Functional Equation</div>
+          <div class="pc-excerpt">This problem is from the ISI BMath and BStat 2026 UGB question paper,
+      like the polynomial problem I posted previously.</div>
+          <div class="pc-meta"><span>May 27, 2026</span><span class="pc-dot">·</span><span>1 min read</span></div>
+        </div>
+        <div class="post-card" data-tag="tag-isi-cmi"
+             onclick="location.href='posts/a-simple-polynomial-problem.html'">
+          <span class="tag tag-isi-cmi">ISI / CMI</span>
+          <div class="pc-title">A Simple Polynomial Problem</div>
+          <div class="pc-excerpt">On 10th May 2026, this question appeared on the Indian Statistical Institute&#x27;s
+      BMath &amp;amp; BStat UGB entrance paper.</div>
+          <div class="pc-meta"><span>May 12, 2026</span><span class="pc-dot">·</span><span>1 min read</span></div>
+        </div>
     </div>
 
-    <p id="empty-filter-msg">Essays on this topic are coming soon.</p>
+    <p id="empty-filter-msg">No problems from this source yet.</p>
   </div>
 
   <footer class="listing-footer">
     <span style="font-family:var(--font-serif);font-style:italic;">
-      "Mathematics is the art of giving the same name to different things." — Poincaré
+      "It is not enough to have a good mind; the main thing is to use it well." — Descartes
     </span>
     <div style="display:flex;gap:1rem;">
       <a href="index.html">Home</a>
@@ -251,8 +263,9 @@
         b.addEventListener('click',function(){applyFilter(b.dataset.filter);});
       });
 
-      var urlTag=new URLSearchParams(window.location.search).get('tag');
-      if(urlTag)applyFilter('tag-'+urlTag);
+      // reads ?source=isi-cmi  →  filters to tag-isi-cmi
+      var urlSource=new URLSearchParams(window.location.search).get('source');
+      if(urlSource)applyFilter('tag-'+urlSource);
     })();
   </script>
 
