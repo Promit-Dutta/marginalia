@@ -6,11 +6,11 @@ USAGE:
     cd marginalia
     pip install flask
     python server.py            # dev server at localhost:5000
-    python server.py --build    # write static posts.html for GitHub Pages
+    python server.py --build    # write static posts.html, problems.html for GitHub Pages
 
 GITHUB PAGES DEPLOYMENT:
     1. Run:  python server.py --build
-    2. Commit all files including the generated posts.html
+    2. Commit all files including the generated posts.html and problems.html
     3. git push
 
     URL forms served identically by this server:
@@ -22,6 +22,8 @@ GITHUB PAGES DEPLOYMENT:
       /posts/<slug>.html → same post
       /notes         → Marginal Notes journal
       /notes.html    → same
+      /problems      → problems listing page
+      /problems.html → problems listing page
       /static/<file> → static assets (comment-policy.html, etc.)
 """
 
@@ -54,17 +56,14 @@ ALL_TAGS = [
     ("tag-probability",    "Probability"),
 ]
 
-# Problem source tags — drives the filter row on problems.html.
-# TO ADD A NEW EXAM SOURCE: append a (css-class, display-label) tuple here.
-# The css-class must also exist in css/layout.css as a .tag-* colour block.
+# Problem source tags — used by build_problems_html() and the Problems listing page.
+# TO ADD A NEW SOURCE: append a (css-class, display-label) tuple here AND add the
+# corresponding .tag-* colour block to css/layout.css.
 PROBLEM_SOURCES = [
     ("tag-isi-cmi",  "ISI / CMI"),
     ("tag-olympiad", "Olympiads"),
     ("tag-putnam",   "Putnam"),
 ]
-
-# Flat set of problem tag classes — used to filter get_posts() results.
-_PROBLEM_TAGS = {cls for cls, _ in PROBLEM_SOURCES}
 
 # ── HTML comment stripper ──────────────────────────────────────────────────────
 # All metadata regexes run against a comment-stripped copy of the post source.
@@ -196,8 +195,6 @@ def build_listing_html(posts):
     TO ADD A TAG: add it to ALL_TAGS at the top of this file.
     TO STYLE THE PAGE: edit the <style> block below.
     """
-
-    posts = [p for p in posts if p["tag_class"] not in _PROBLEM_TAGS]
     used_tags = set()
     for p in posts:
         for cls in p["tag_class"].split():
@@ -314,7 +311,6 @@ def build_listing_html(posts):
     .filter-btn:focus-visible {{ outline: 2px solid var(--text-2); outline-offset: 3px; }}
     .cards-grid {{
       display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 16px;
-      min-height: 300px;
     }}
     .post-card {{
       background: var(--card-bg); border: 0.5px solid var(--border);
@@ -501,22 +497,17 @@ def build_listing_html(posts):
 
 def build_problems_html(posts):
     """
-    Returns the full HTML for the problems listing page (problems.html).
-    Filters get_posts() results to only posts whose tag_class is in
-    _PROBLEM_TAGS (tag-isi-cmi, tag-olympiad, tag-putnam).
+    Returns the full HTML for the problems listing page.
+    Only shows posts whose tag_class is a problem source tag.
+    Filters via ?source= URL parameter instead of ?tag=.
 
-    Filter buttons use ?source= in the URL (e.g. ?source=isi-cmi) so that
-    the problems and essays listings use distinct URL parameters and don't
-    interfere with each other.
-
-    TO ADD A NEW EXAM SOURCE:
-      1. Append to PROBLEM_SOURCES at the top of this file.
-      2. Add a .tag-yourname colour block to css/layout.css.
-      3. Add the nav dropdown link in every HTML file's Problems panel.
-      4. Run: python server.py --build
+    TO ADD A SOURCE TAG: add it to PROBLEM_SOURCES at the top of this file,
+    add the .tag-* colour block to css/layout.css, and tag the relevant posts.
     """
-    problem_posts = [p for p in posts if p["tag_class"] in _PROBLEM_TAGS]
+    PROBLEM_TAG_SET = {"tag-isi-cmi", "tag-olympiad", "tag-putnam"}
+    problem_posts = [p for p in posts if p["tag_class"] in PROBLEM_TAG_SET]
 
+    # Build post cards
     cards_html = ""
     if problem_posts:
         for p in problem_posts:
@@ -556,8 +547,8 @@ def build_problems_html(posts):
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Problems — Marginalia</title>
-  <meta name="description" content="Problem solutions on Marginalia — ISI, CMI, olympiads, and Putnam problems with full write-ups by Promit Dutta."/>
+  <title>All Problems — Marginalia</title>
+  <meta name="description" content="Competition problems and solutions on Marginalia — ISI/CMI, Olympiads, and Putnam, by Promit Dutta."/>
   <link rel="canonical" href="https://promit-dutta.github.io/marginalia/problems.html"/>
   <script>
     (function(){{
@@ -573,6 +564,7 @@ def build_problems_html(posts):
   <link rel="stylesheet" href="css/base.css"/>
   <link rel="stylesheet" href="css/layout.css"/>
   <style>
+    html {{ overflow-y: scroll; }}
     body {{
       background: var(--bg); color: var(--text);
       min-height: 100vh; display: flex; flex-direction: column;
@@ -624,7 +616,6 @@ def build_problems_html(posts):
     .filter-btn:focus-visible {{ outline: 2px solid var(--text-2); outline-offset: 3px; }}
     .cards-grid {{
       display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 16px;
-      min-height: 300px;
     }}
     .post-card {{
       background: var(--card-bg); border: 0.5px solid var(--border);
@@ -733,8 +724,8 @@ def build_problems_html(posts):
 
   <div class="listing-wrap">
     <div class="listing-header">
-      <h1 class="listing-title">Problems</h1>
-      <p class="listing-count">{count} solution{plural} so far</p>
+      <h1 class="listing-title">All problems</h1>
+      <p class="listing-count">{count} problem{plural} so far</p>
     </div>
 
     <div class="filter-row" id="filters">
@@ -745,12 +736,12 @@ def build_problems_html(posts):
       {cards_html}
     </div>
 
-    <p id="empty-filter-msg">No problems from this source yet.</p>
+    <p id="empty-filter-msg">Problems from this source are coming soon.</p>
   </div>
 
   <footer class="listing-footer">
     <span style="font-family:var(--font-serif);font-style:italic;">
-      "It is not enough to have a good mind; the main thing is to use it well." — Descartes
+      "Mathematics is the art of giving the same name to different things." — Poincaré
     </span>
     <div style="display:flex;gap:1rem;">
       <a href="index.html">Home</a>
@@ -797,7 +788,6 @@ def build_problems_html(posts):
         b.addEventListener('click',function(){{applyFilter(b.dataset.filter);}});
       }});
 
-      // reads ?source=isi-cmi  →  filters to tag-isi-cmi
       var urlSource=new URLSearchParams(window.location.search).get('source');
       if(urlSource)applyFilter('tag-'+urlSource);
     }})();
@@ -826,13 +816,6 @@ def posts_listing():
     return build_listing_html(get_posts())
 
 
-@app.route("/problems/")
-@app.route("/problems")
-@app.route("/problems.html")
-def problems_listing():
-    return build_problems_html(get_posts())
-
-
 @app.route("/posts/<slug>")
 @app.route("/posts/<slug>.html")
 def post(slug):
@@ -841,6 +824,13 @@ def post(slug):
     if not os.path.isfile(fpath):
         abort(404)
     return send_from_directory(POSTS_DIR, f"{safe}.html")
+
+
+@app.route("/problems/")
+@app.route("/problems")
+@app.route("/problems.html")
+def problems_listing():
+    return build_problems_html(get_posts())
 
 
 @app.route("/css/<path:filename>")
@@ -943,8 +933,8 @@ def not_found(e):
 
 def build_static():
     """
-    Writes posts.html, problems.html, and feed.xml to the project root
-    for GitHub Pages. Run before every push that adds or removes a post:
+    Writes posts.html, problems.html, and feed.xml to the project root for GitHub Pages.
+    Run before every push that adds or removes a post:
         python server.py --build
     """
     posts  = get_posts()
@@ -958,7 +948,7 @@ def build_static():
     problems_out = os.path.join(BASE_DIR, "problems.html")
     with open(problems_out, "w", encoding="utf-8") as f:
         f.write(build_problems_html(posts))
-    problem_count = len([p for p in posts if p["tag_class"] in _PROBLEM_TAGS])
+    problem_count = len([p for p in posts if p["tag_class"] in {"tag-isi-cmi", "tag-olympiad", "tag-putnam"}])
     print(f"  problems.html — {problem_count} problem(s)")
 
     items = ""
@@ -985,9 +975,9 @@ def build_static():
     feed_out = os.path.join(BASE_DIR, "feed.xml")
     with open(feed_out, "w", encoding="utf-8") as f:
         f.write(feed_xml)
-    print(f"  feed.xml     — {len(posts)} item(s)")
-    print(f"\n  Domain is set to promit-dutta.github.io/marginalia — run --build to regenerate posts.html and feed.xml.")
-    print("  Commit both files and push for GitHub Pages.\n")
+    print(f"  feed.xml      — {len(posts)} item(s)")
+    print(f"\n  Domain is set to promit-dutta.github.io/marginalia — run --build to regenerate.")
+    print("  Commit posts.html, problems.html, feed.xml and push for GitHub Pages.\n")
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
