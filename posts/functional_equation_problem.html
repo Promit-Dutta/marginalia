@@ -10,13 +10,14 @@
       document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));
     })();
   </script>
-  <title>A Functional Equation — Marginalia</title>
-  <meta name="description" content="A proof that the only twice-differentiable function satisfying f(x+y)+f(x-y)=2(f(x)+f(y)) with f''(0)=2 is f(x)=x². From ISI BMath/BStat UGB 2026."/>
-  <meta property="og:title"       content="A Functional Equation — Marginalia"/>
-  <meta property="og:description" content="A nice functional equation problem from ISI BMath/BStat UGB 2026."/>
+  <!-- CHANGE: post title and description -->
+  <title>Post Title — Marginalia</title>
+  <meta name="description" content="A short description of this post for search engines (150–160 chars)."/>
+  <meta property="og:title"       content="A Functional Equation— Marginalia"/>
+  <meta property="og:description" content="A nice functional equation problem"/>
   <meta property="og:type"        content="article"/>
   <meta property="og:url"         content="https://promit-dutta.github.io/marginalia/posts/functional_equation_problem.html"/>
-  <link rel="canonical"           href="https://promit-dutta.github.io/marginalia/posts/functional_equation_problem.html"/>
+  <link rel="canonical" href="https://promit-dutta.github.io/marginalia/posts/functional_equation_problem.html"/>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -36,92 +37,53 @@
 </head>
 <body class="post-page">
 
-<nav id="main-nav">
-  <a href="../index.html" class="nav-logo">Marginalia</a>
-
-  <input type="checkbox" id="nav-toggle"/>
-  <label for="nav-toggle" class="nav-hamburger" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </label>
-
-  <ul class="nav-links">
-
-    <li class="nav-has-dropdown">
-      <button class="nav-dropdown-btn" aria-haspopup="true" aria-expanded="false">
-        Essays
-        <svg class="nav-chevron" width="9" height="5" viewBox="0 0 9 5" fill="none" aria-hidden="true">
-          <path d="M1 1l3.5 3L8 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <div class="nav-dropdown-panel">
-        <a href="../posts.html" class="ndp-all">All essays</a>
-        <span class="ndp-label">By topic</span>
-        <a href="../posts.html?tag=analysis">Analysis</a>
-        <a href="../posts.html?tag=algebra">Algebra</a>
-        <a href="../posts.html?tag=topology">Topology</a>
-        <a href="../posts.html?tag=geometry">Geometry</a>
-        <a href="../posts.html?tag=number-theory">Number Theory</a>
-        <a href="../posts.html?tag=logic">Logic</a>
-        <a href="../posts.html?tag=probability">Probability</a>
-      </div>
-    </li>
-
-    <li class="nav-has-dropdown">
-      <button class="nav-dropdown-btn" aria-haspopup="true" aria-expanded="false">
-        Problems
-        <svg class="nav-chevron" width="9" height="5" viewBox="0 0 9 5" fill="none" aria-hidden="true">
-          <path d="M1 1l3.5 3L8 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <div class="nav-dropdown-panel">
-        <a href="../problems.html" class="ndp-all">All problems</a>
-        <span class="ndp-label">By source</span>
-        <a href="../problems.html?source=isi-cmi">ISI / CMI</a>
-        <a href="../problems.html?source=olympiad">Olympiads</a>
-        <a href="../problems.html?source=putnam">Putnam</a>
-      </div>
-    </li>
-
-    <li><a href="../notes.html">Marginal Notes</a></li>
+<nav class="post-nav">
+  <a href="../index.html" class="post-nav-logo">Marginalia</a>
+  <ul class="post-nav-links">
+    <li><a href="../posts.html">All essays</a></li>
+    <li><a href="../posts.html?tag=analysis">Analysis</a></li>
+    <li><a href="../posts.html?tag=algebra">Algebra</a></li>
+    <li><a href="../posts.html?tag=topology">Topology</a></li>
     <li><a href="../index.html#about">About</a></li>
-
   </ul>
-
-  <button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
-    <svg id="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+  <button id="theme-toggle" aria-label="Toggle dark mode">
+    <svg id="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
     </svg>
     <svg id="icon-sun" width="14" height="14" viewBox="0 0 24 24"
          fill="none" stroke="currentColor" stroke-width="2"
-         stroke-linecap="round" stroke-linejoin="round"
-         style="display:none" aria-hidden="true">
+         stroke-linecap="round" stroke-linejoin="round" style="display:none">
       <circle cx="12" cy="12" r="5"/>
-      <line x1="12" y1="1"  x2="12" y2="3"/>
-      <line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="12" y1="1"  x2="12" y2="3"/>  <line x1="12" y1="21" x2="12" y2="23"/>
       <line x1="4.22" y1="4.22"  x2="5.64"  y2="5.64"/>
       <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-      <line x1="1"  y1="12" x2="3"  y2="12"/>
-      <line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="1"  y1="12" x2="3"  y2="12"/>  <line x1="21" y1="12" x2="23" y2="12"/>
       <line x1="4.22" y1="19.78"  x2="5.64"  y2="18.36"/>
       <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
     </svg>
   </button>
 </nav>
+<!-- ══ POST HERO ════════════════════════════════════════════════
+     Riemann Zeta ζ(½+it) — parametric curve, ripple at each zero.
+     The title text (.post-hero-content) is always on top.
 
-<!-- ══ POST HERO — Riemann Zeta ζ(½+it) parametric curve ══════ -->
+     TO CHANGE THE TITLE:  edit the tag span and h1 heading below.
+     TO CHANGE THE REGION: see TUNABLE constants in the script at the end.
+════════════════════════════════════════════════════════════════ -->
 <div class="post-hero">
   <canvas id="hero-cv"></canvas>
+  <!-- CHANGE: tag class + post title -->
   <div class="post-hero-content">
-    <span class="tag tag-isi-cmi">ISI / CMI</span>
+    <span class="tag tag-analysis">Analysis</span>
     <h1 class="post-hero-title">A Functional Equation</h1>
   </div>
 </div>
-
 <main class="post-wrap">
 
   <header class="post-header">
     <div class="post-meta">
-      <span>May 27, 2026</span>
+      <!-- CHANGE: date and read time -->
+      <span>05 27, 2026</span>
       <span class="post-meta-dot">·</span>
       <span>7 min read</span>
       <span class="post-meta-dot">·</span>
@@ -129,6 +91,21 @@
     </div>
   </header>
 
+  <!-- ══ POST BODY ═══════════════════════════════════════════════
+       QUICK REFERENCE:
+         Inline math      → $e^{i\pi}+1=0$
+         Display math     → $$\int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}$$
+                            (own paragraph, blank lines above and below)
+         Section heading  → <h2>Title</h2>
+         Sub-section      → <h3>Title</h3>
+         Definition box   → <div class="definition-box"><strong>Definition.</strong> …</div>
+         Theorem box      → <div class="theorem-box"><strong>Theorem.</strong> …</div>
+         Note / remark    → <div class="note-box">…</div>
+         Pull quote       → <div class="pull-quote">…</div>
+         Inline code      → <code>f(x)</code>
+         Drop cap         → automatic on the first paragraph in .post-body
+         New box type     → copy .theorem-box in post.css, rename, change ::before content
+  ════════════════════════════════════════════════════════════════ -->
   <div class="post-body">
 
     <p>
@@ -195,15 +172,16 @@
 
   </div><!-- /.post-body -->
 
+  <!-- CHANGE: update href values when prev/next posts exist -->
   <nav class="post-footer" aria-label="Post navigation">
-    <a href="../problems.html">← All problems</a>
-    <a href="../problems.html?source=isi-cmi">More ISI / CMI →</a>
+    <a href="../posts.html">← All essays</a>
+    <a href="../posts.html">Next essay →</a>
   </nav>
 
 </main>
-
 <section class="comments-section" id="comments">
   <h2 class="comments-header">Discussion</h2>
+
   <p class="comment-subtitle">
     Comments are public and linked to your GitHub account.
     Math works here — use <code>$...$</code> for inline and
@@ -213,6 +191,7 @@
        class="comment-policy-link"
        target="_blank" rel="noopener noreferrer">Comment policy →</a>
   </p>
+
   <div id="giscus-container"></div>
   <script>
   (function(){
@@ -238,7 +217,6 @@
   })();
   </script>
 </section>
-
 <footer class="site-footer">
   <span class="site-footer-brand">Marginalia — a mathematics notebook</span>
   <div class="site-footer-links">
@@ -272,8 +250,17 @@
   });
 })();
 </script>
+<!-- ══ RIEMANN ZETA FUNCTION ANIMATION ═════════════════════════
+     Draws the parametric curve ζ(½+it) in the complex plane.
+     Each time the curve passes through a non-trivial zero
+     (t ≈ 14.13, 21.02, 25.01, 30.42, 32.93, 37.59),
+     two concentric rings expand from the origin.
 
-<!-- ══ RIEMANN ZETA FUNCTION ANIMATION — do not edit ══════════ -->
+     TUNABLE:
+       DURATION  — total animation length in ms (14000 = 14s)
+       T_MAX     — range of t parameter (42 catches first 5 zeros)
+       N_TERMS   — partial sum accuracy (120 is good for visuals)
+════════════════════════════════════════════════════════════════ -->
 <script>
 (function(){
   var cv=document.getElementById('hero-cv'), ctx=cv.getContext('2d');
@@ -358,13 +345,12 @@
 
 <script>
 (function(){
-  var link = document.querySelector('.comment-policy-link');
-  if(link){
-    link.href = '../static/comment-policy.html?from=' + encodeURIComponent(window.location.href);
+  var commentpolicyLink = document.querySelector('.comment-policy-link');
+  if(commentpolicyLink){
+    commentpolicyLink.href = '../static/comment-policy.html?from=' + encodeURIComponent(window.location.href);
   }
 })();
 </script>
 
-<script src="../js/nav-dropdown.js"></script>
 </body>
 </html>

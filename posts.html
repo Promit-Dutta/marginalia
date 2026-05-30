@@ -118,46 +118,13 @@
       <span></span><span></span><span></span>
     </label>
     <ul class="nav-links">
-
-      <li class="nav-has-dropdown">
-        <button class="nav-dropdown-btn" aria-haspopup="true" aria-expanded="false">
-          Essays
-          <svg class="nav-chevron" width="9" height="5" viewBox="0 0 9 5" fill="none" aria-hidden="true">
-            <path d="M1 1l3.5 3L8 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <div class="nav-dropdown-panel">
-          <a href="posts.html" class="ndp-all">All essays</a>
-          <span class="ndp-label">By topic</span>
-          <a href="posts.html?tag=analysis">Analysis</a>
-          <a href="posts.html?tag=algebra">Algebra</a>
-          <a href="posts.html?tag=topology">Topology</a>
-          <a href="posts.html?tag=geometry">Geometry</a>
-          <a href="posts.html?tag=number-theory">Number Theory</a>
-          <a href="posts.html?tag=logic">Logic</a>
-          <a href="posts.html?tag=probability">Probability</a>
-        </div>
-      </li>
-
-      <li class="nav-has-dropdown">
-        <button class="nav-dropdown-btn" aria-haspopup="true" aria-expanded="false">
-          Problems
-          <svg class="nav-chevron" width="9" height="5" viewBox="0 0 9 5" fill="none" aria-hidden="true">
-            <path d="M1 1l3.5 3L8 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <div class="nav-dropdown-panel">
-          <a href="problems.html" class="ndp-all">All problems</a>
-          <span class="ndp-label">By source</span>
-          <a href="problems.html?source=isi-cmi">ISI / CMI</a>
-          <a href="problems.html?source=olympiad">Olympiads</a>
-          <a href="problems.html?source=putnam">Putnam</a>
-        </div>
-      </li>
-
+      <li><a href="posts.html">All essays</a></li>
+      <li><a href="posts.html?tag=analysis">Analysis</a></li>
+      <li><a href="posts.html?tag=algebra">Algebra</a></li>
+      <li><a href="posts.html?tag=topology">Topology</a></li>
+      <li><a href="posts.html?tag=logic">Logic</a></li>
       <li><a href="notes.html">Marginal Notes</a></li>
       <li><a href="index.html#about">About</a></li>
-
     </ul>
     <button id="theme-toggle" aria-label="Toggle dark mode">
       <svg id="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -180,7 +147,7 @@
   <div class="listing-wrap">
     <div class="listing-header">
       <h1 class="listing-title">All essays</h1>
-      <p class="listing-count">0 pieces so far</p>
+      <p class="listing-count">2 pieces so far</p>
     </div>
 
     <div class="filter-row" id="filters">
@@ -196,7 +163,23 @@
     </div>
 
     <div class="cards-grid" id="cards">
-      <p class="empty-msg">.</p>
+      
+        <div class="post-card" data-tag="tag-analysis"
+             onclick="location.href='posts/functional_equation_problem.html'">
+          <span class="tag tag-analysis">Analysis</span>
+          <div class="pc-title">A Functional Equation</div>
+          <div class="pc-excerpt">This problem is from the ISI BMath and BStat 2026 UGB question paper,
+      like the polynomial problem I posted previously.</div>
+          <div class="pc-meta"><span>05 27, 2026</span><span class="pc-dot">·</span><span>1 min read</span></div>
+        </div>
+        <div class="post-card" data-tag="tag-algebra"
+             onclick="location.href='posts/a-simple-polynomial-problem.html'">
+          <span class="tag tag-algebra">Algebra</span>
+          <div class="pc-title">A Simple Polynomial Problem</div>
+          <div class="pc-excerpt">On 10th May 2026, this question appeared on the Indian Statistical Institute&#x27;s
+      BMath &amp;amp; BStat UGB entrance paper.</div>
+          <div class="pc-meta"><span>May 12, 2026</span><span class="pc-dot">·</span><span>1 min read</span></div>
+        </div>
     </div>
 
     <p id="empty-filter-msg">Essays on this topic are coming soon.</p>
@@ -256,6 +239,5 @@
     })();
   </script>
 
-  <script src="js/nav-dropdown.js"></script>
 </body>
 </html>

@@ -37,78 +37,32 @@
 </head>
 <body class="post-page">
 
-<nav id="main-nav">
-  <a href="../index.html" class="nav-logo">Marginalia</a>
-
-  <input type="checkbox" id="nav-toggle"/>
-  <label for="nav-toggle" class="nav-hamburger" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </label>
-
-  <ul class="nav-links">
-
-    <li class="nav-has-dropdown">
-      <button class="nav-dropdown-btn" aria-haspopup="true" aria-expanded="false">
-        Essays
-        <svg class="nav-chevron" width="9" height="5" viewBox="0 0 9 5" fill="none" aria-hidden="true">
-          <path d="M1 1l3.5 3L8 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <div class="nav-dropdown-panel">
-        <a href="../posts.html" class="ndp-all">All essays</a>
-        <span class="ndp-label">By topic</span>
-        <a href="../posts.html?tag=analysis">Analysis</a>
-        <a href="../posts.html?tag=algebra">Algebra</a>
-        <a href="../posts.html?tag=topology">Topology</a>
-        <a href="../posts.html?tag=geometry">Geometry</a>
-        <a href="../posts.html?tag=number-theory">Number Theory</a>
-        <a href="../posts.html?tag=logic">Logic</a>
-        <a href="../posts.html?tag=probability">Probability</a>
-      </div>
-    </li>
-
-    <li class="nav-has-dropdown">
-      <button class="nav-dropdown-btn" aria-haspopup="true" aria-expanded="false">
-        Problems
-        <svg class="nav-chevron" width="9" height="5" viewBox="0 0 9 5" fill="none" aria-hidden="true">
-          <path d="M1 1l3.5 3L8 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <div class="nav-dropdown-panel">
-        <a href="../problems.html" class="ndp-all">All problems</a>
-        <span class="ndp-label">By source</span>
-        <a href="../problems.html?source=isi-cmi">ISI / CMI</a>
-        <a href="../problems.html?source=olympiad">Olympiads</a>
-        <a href="../problems.html?source=putnam">Putnam</a>
-      </div>
-    </li>
-
-    <li><a href="../notes.html">Marginal Notes</a></li>
+<nav class="post-nav">
+  <a href="../index.html" class="post-nav-logo">Marginalia</a>
+  <ul class="post-nav-links">
+    <li><a href="../posts.html">All essays</a></li>
+    <li><a href="../posts.html?tag=analysis">Analysis</a></li>
+    <li><a href="../posts.html?tag=algebra">Algebra</a></li>
+    <li><a href="../posts.html?tag=topology">Topology</a></li>
     <li><a href="../index.html#about">About</a></li>
-
   </ul>
-
-  <button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
-    <svg id="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+  <button id="theme-toggle" aria-label="Toggle dark mode">
+    <svg id="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
     </svg>
     <svg id="icon-sun" width="14" height="14" viewBox="0 0 24 24"
          fill="none" stroke="currentColor" stroke-width="2"
-         stroke-linecap="round" stroke-linejoin="round"
-         style="display:none" aria-hidden="true">
+         stroke-linecap="round" stroke-linejoin="round" style="display:none">
       <circle cx="12" cy="12" r="5"/>
-      <line x1="12" y1="1"  x2="12" y2="3"/>
-      <line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="12" y1="1"  x2="12" y2="3"/>  <line x1="12" y1="21" x2="12" y2="23"/>
       <line x1="4.22" y1="4.22"  x2="5.64"  y2="5.64"/>
       <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-      <line x1="1"  y1="12" x2="3"  y2="12"/>
-      <line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="1"  y1="12" x2="3"  y2="12"/>  <line x1="21" y1="12" x2="23" y2="12"/>
       <line x1="4.22" y1="19.78"  x2="5.64"  y2="18.36"/>
       <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
     </svg>
   </button>
 </nav>
-
 <!-- ══ POST HERO ════════════════════════════════════════════════
      Mandelbrot Set — progressive render, slow palette cycling.
      The title text (.post-hero-content) is always on top.
@@ -127,7 +81,6 @@
     <h1 class="post-hero-title">Your Post Title Here</h1>
   </div>
 </div>
-
 <main class="post-wrap">
 
   <header class="post-header">
@@ -201,7 +154,17 @@
   </nav>
 
 </main>
+<!-- ══ COMMENTS ════════════════════════════════════════════════
+     Powered by Giscus (GitHub Discussions).
+     Commenters can write $inline$ or $$display$$ math directly.
 
+     SETUP (one-time):
+       1. Push this repo to GitHub (public)
+       2. Repo → Settings → Features → check Discussions
+       3. Install Giscus app: github.com/apps/giscus
+       4. Get your config at giscus.app
+       5. Replace the four YOUR_* values in the script below.
+════════════════════════════════════════════════════════════════ -->
 <section class="comments-section" id="comments">
   <h2 class="comments-header">Discussion</h2>
 
@@ -240,7 +203,6 @@
   })();
   </script>
 </section>
-
 <footer class="site-footer">
   <span class="site-footer-brand">Marginalia — a mathematics notebook</span>
   <div class="site-footer-links">
@@ -274,7 +236,6 @@
   });
 })();
 </script>
-
 <!-- ══ MANDELBROT SET ANIMATION ════════════════════════════════
      Progressive render: 8x8 blocks → 4x4 → 2x2 → full pixel.
      After render, palette cycles slowly and continuously.
@@ -364,6 +325,5 @@
 })();
 </script>
 
-<script src="../js/nav-dropdown.js"></script>
 </body>
 </html>
