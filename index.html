@@ -697,6 +697,7 @@
     return;
   }
   sessionStorage.setItem('mg-intro', '1');
+  document.documentElement.style.overflow = 'hidden'; /* lock ALL scroll during loader */
 
   const cv  = document.getElementById('cv');
   const ctx = cv.getContext('2d');
@@ -800,6 +801,7 @@
       const home=document.getElementById('home');
       loader.classList.add('fade-out');
       setTimeout(()=>{
+        document.documentElement.style.overflow=''; /* restore — CSS overflow-y:scroll resumes */
         loader.style.display='none';
         home.style.display='flex';
         requestAnimationFrame(()=>requestAnimationFrame(()=>home.classList.add('visible')));

@@ -23,10 +23,17 @@
                          appears/disappears (e.g. filter empties cards).
 ──────────────────────────────────────────────────────────────── */
 html {
-  overflow-x: hidden;
-  scrollbar-gutter: stable;
+  overflow-x: hidden;       /* prevents horizontal viewport scroll */
+  overflow-y: scroll;       /* always-present scrollbar — available width is
+                               constant regardless of page height, so
+                               margin:0 auto centering never shifts */
 }
 
+body {
+  overflow-x: clip;         /* secondary guard: clips any horizontal overflow
+                               without creating a scroll container, so
+                               position:sticky on the nav is unaffected */
+}
 
 
 
