@@ -71,6 +71,7 @@
     .filter-btn:focus-visible { outline: 2px solid var(--text-2); outline-offset: 3px; }
     .cards-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 16px;
+      min-height: 300px;
     }
     .post-card {
       background: var(--card-bg); border: 0.5px solid var(--border);
@@ -180,7 +181,7 @@
   <div class="listing-wrap">
     <div class="listing-header">
       <h1 class="listing-title">All essays</h1>
-      <p class="listing-count">2 pieces so far</p>
+      <p class="listing-count">0 pieces so far</p>
     </div>
 
     <div class="filter-row" id="filters">
@@ -196,23 +197,7 @@
     </div>
 
     <div class="cards-grid" id="cards">
-      
-        <div class="post-card" data-tag="tag-isi-cmi"
-             onclick="location.href='posts/functional_equation_problem.html'">
-          <span class="tag tag-isi-cmi">ISI / CMI</span>
-          <div class="pc-title">A Functional Equation</div>
-          <div class="pc-excerpt">This problem is from the ISI BMath and BStat 2026 UGB question paper,
-      like the polynomial problem I posted previously.</div>
-          <div class="pc-meta"><span>May 27, 2026</span><span class="pc-dot">·</span><span>1 min read</span></div>
-        </div>
-        <div class="post-card" data-tag="tag-isi-cmi"
-             onclick="location.href='posts/a-simple-polynomial-problem.html'">
-          <span class="tag tag-isi-cmi">ISI / CMI</span>
-          <div class="pc-title">A Simple Polynomial Problem</div>
-          <div class="pc-excerpt">On 10th May 2026, this question appeared on the Indian Statistical Institute&#x27;s
-      BMath &amp;amp; BStat UGB entrance paper.</div>
-          <div class="pc-meta"><span>May 12, 2026</span><span class="pc-dot">·</span><span>1 min read</span></div>
-        </div>
+      <p class="empty-msg">.</p>
     </div>
 
     <p id="empty-filter-msg">Essays on this topic are coming soon.</p>
