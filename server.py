@@ -314,6 +314,7 @@ def build_listing_html(posts):
     .filter-btn:focus-visible {{ outline: 2px solid var(--text-2); outline-offset: 3px; }}
     .cards-grid {{
       display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 16px;
+      min-height: 300px;
     }}
     .post-card {{
       background: var(--card-bg); border: 0.5px solid var(--border);
@@ -623,6 +624,7 @@ def build_problems_html(posts):
     .filter-btn:focus-visible {{ outline: 2px solid var(--text-2); outline-offset: 3px; }}
     .cards-grid {{
       display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 16px;
+      min-height: 300px;
     }}
     .post-card {{
       background: var(--card-bg); border: 0.5px solid var(--border);

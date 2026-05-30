@@ -12,6 +12,30 @@
      Then use in HTML: <span class="tag tag-yourname">Label</span>
 ================================================================ */
 
+
+/* ── GLOBAL OVERFLOW & SCROLLBAR GUTTER ─────────────────────────
+   overflow-x: hidden  : prevents the off-screen fixed sidebar from
+                         creating a scrollable horizontal gap on
+                         mobile (Android Chrome layout viewport).
+                         Set on html only — body would break sticky.
+   scrollbar-gutter: stable : reserves scrollbar width permanently,
+                         preventing layout shift when the scrollbar
+                         appears/disappears (e.g. filter empties cards).
+──────────────────────────────────────────────────────────────── */
+html {
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+}
+
+
+
+
+
+
+
+
+
+
 /* ── STICKY NAV ──────────────────────────────────────────────
    position:sticky + var(--z-nav) keeps this above everything
    while still participating in normal document flow.           */
@@ -452,6 +476,7 @@
     top: 0;
     right: 0;
     width: min(280px, 82vw);
+    height: 100vh;
     height: 100dvh;
     flex-direction: column;
     align-items: flex-start;
