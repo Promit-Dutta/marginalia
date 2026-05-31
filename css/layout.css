@@ -218,6 +218,12 @@ body {
   padding: 3px 12px;
   border-radius: 2px;
   transition: var(--t-color);
+  
+}
+
+.tag a {
+  cursor: pointer;
+  display: block; /* makes entire pill area clickable, not just the text */
 }
 
 /* Analysis — cool blue */
