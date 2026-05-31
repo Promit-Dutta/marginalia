@@ -599,3 +599,31 @@ body {
   visibility: visible;
   pointer-events: auto;
 }
+
+
+
+/* ================================================================
+   ADDITIONS — append these two blocks to the END of layout.css.
+   Do not modify anything above; these are purely additive rules.
+================================================================ */
+
+/* ── DROPDOWN PANELS: cap height + scroll when many links added ─
+   Desktop: panel is absolutely positioned with no prior height cap.
+   We add a viewport-relative ceiling so it never falls off-screen,
+   and overflow-y: auto so a scrollbar appears only when needed.
+   Mobile: the accordion already transitions max-height 0 → 400px.
+   Adding overflow-y: auto to the open state lets links scroll
+   inside that 400px window instead of being clipped silently.
+   Neither rule touches the existing opacity/visibility animation.  */
+@media (min-width: 769px) {
+  .nav-dropdown-panel {
+    max-height: calc(100vh - var(--nav-h, 48px) - 24px);
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-has-dropdown.is-open .nav-dropdown-panel {
+    overflow-y: auto;
+  }
+}

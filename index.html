@@ -198,6 +198,39 @@
       .about-purpose { font-size: 13px; max-width: 100%; }
       .site-title    { letter-spacing: 0.05em; }
     }
+
+
+
+    /* ── Mobile dark mode: title legibility over the dark landscape ──
+   In dark mode the landscape drops to brightness(0.65), which
+   makes the near-black tree silhouettes dominant on narrow screens.
+   On desktop the title is safely above that zone; on mobile it
+   can overlap the trees. This rule applies ONLY on ≤640px dark mode:
+     · Forces a bright sage-white on .site-title (instead of relying
+       solely on var(--text) which may be too dim against near-black).
+     · Wraps all three hero text elements in a strong dark shadow
+       halo so they read on any part of the painting.
+   Nothing below ≤640px or outside [data-theme="dark"] is touched.  */
+@media (max-width: 640px) {
+  [data-theme="dark"] .site-title {
+    color: #d8eac8;
+    text-shadow:
+      0 2px 16px rgba(0, 0, 0, 0.96),
+      0 0  36px rgba(0, 0, 0, 0.90),
+      0 4px  8px rgba(0, 0, 0, 0.98);
+  }
+  [data-theme="dark"] .site-tagline,
+  [data-theme="dark"] .hero-eq {
+    text-shadow:
+      0 1px 10px rgba(0, 0, 0, 0.94),
+      0 0  22px rgba(0, 0, 0, 0.84);
+  }
+}
+
+    
+
+
+    
   </style>
 </head>
 <body>
