@@ -21,7 +21,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=EB+Garamond:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400&display=swap"/>
-  <!-- KaTeX: inline $...$ and display $$...$$ work here too -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"/>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer
@@ -36,8 +35,8 @@
 
   <style>
     /*
-      notes.css (inlined) — styles for the Marginal Notes journal page.
-      All colors use CSS variables from base.css — dark mode is automatic.
+      notes.css (inlined) — Marginal Notes journal page styles.
+      Colors use CSS variables from base.css — dark mode is automatic.
 
       HOW TO ADD A NEW ENTRY:
         1. Copy any <article class="note-entry"> block.
@@ -45,10 +44,6 @@
         3. Update: id, date, year, time, title, and body text.
         4. Math: $inline$ and $$display$$ work exactly as in posts.
         5. Increment the entry count in .notes-header-meta.
-
-      LAYOUT:
-        Desktop: two-column grid — date in left margin, content right.
-        Mobile: single column, date above content.
     */
 
     body.notes-page {
@@ -60,9 +55,9 @@
       flex-direction: column;
     }
 
-    /* ── NOTES HERO — canvas animation header ────────────────────────
-       Dark band at top of page. Canvas animation renders behind the
-       header text. A gradient at the bottom fades into the page bg.   */
+    /* ── NOTES HERO ─────────────────────────────────────────────
+       Dark band at top. Canvas animation renders behind the text.
+       A gradient at the bottom fades into the page background.  */
     .notes-hero {
       position: relative;
       width: 100%;
@@ -73,17 +68,17 @@
       align-items: flex-end;
     }
 
-    /* Canvas fills the hero entirely; animation JS sizes it to parent. */
+    /* Canvas fills the hero entirely.
+       inset:0 stretches it to the parent via CSS positioning.
+       width/height HTML attributes give the drawing buffer a
+       safe fallback until JS resizes them in fit().             */
     #notes-cv {
       position: absolute;
       inset: 0;
-      width: 100%;
-      height: 100%;
       display: block;
     }
 
-    /* Gradient melts the dark hero into the light post page below.
-       Uses var(--post-bg) so it adapts correctly in dark mode.        */
+    /* Gradient fades dark hero into the page below */
     .notes-hero-fade {
       position: absolute;
       bottom: 0;
@@ -96,52 +91,81 @@
       transition: background var(--t-slow);
     }
 
-    /* Header text sits above canvas (z:2) and above fade (z:1).       */
+    /* Header text sits above canvas (z:2) and above fade (z:1) */
     .notes-header-hero {
       position: relative;
       z-index: 2;
       width: 100%;
       max-width: 760px;
       margin: 0 auto;
-      /* override the default notes-header border/margin */
       border-bottom: none !important;
       margin-bottom: 0 !important;
       padding: 2.8rem 2rem 3rem !important;
     }
 
-    /* Light-on-dark colour overrides for title and desc inside hero.  */
+    /* ── HERO HEADER TEXT ── */
+    .notes-title {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 300;
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+      margin-bottom: 0.6rem;
+      transition: color var(--t-slow);
+    }
+
+    .notes-desc {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: clamp(14px, 2vw, 16px);
+      line-height: 1.7;
+      margin-bottom: 1.2rem;
+      max-width: 54ch;
+      transition: color var(--t-slow);
+    }
+
+    .notes-header-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .notes-entry-count {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      transition: color var(--t-slow);
+    }
+
+    /* Light-on-dark colour overrides for text inside the dark hero */
     .notes-header-hero .notes-title {
       color: #dde8c8;
       text-shadow: 0 1px 24px rgba(0,0,0,0.65), 0 0 44px rgba(0,0,0,0.40);
     }
-
     .notes-header-hero .notes-desc {
       color: rgba(168, 205, 128, 0.78);
       text-shadow: 0 1px 10px rgba(0,0,0,0.52);
     }
-
     .notes-header-hero .notes-entry-count {
       color: rgba(148, 180, 100, 0.65);
     }
-
-    /* Shift the tag to use dark-mode-style colours on the dark hero.  */
+    /* Dark-hero tag override — parchment style on dark background */
     .notes-header-hero .tag-notes {
       background: rgba(60, 36, 10, 0.72);
       color: #d4a060;
       border-color: rgba(170, 110, 35, 0.38);
     }
 
-    /* ── Main wrapper ── */
+    /* ── MAIN WRAPPER ── */
     .notes-wrap {
       max-width: 760px;
       margin: 0 auto;
-      /* reduce top padding — hero already provides visual breathing room */
       padding: var(--sp-5) var(--sp-6) var(--sp-8);
       flex: 1;
     }
 
-    /* Thin rule that separates hero bottom from the first entry.
-       Sits at the very top of .notes-wrap.                            */
+    /* Thin rule separating hero from first entry */
     .notes-wrap-rule {
       height: 0.5px;
       background: var(--post-border);
@@ -149,7 +173,7 @@
       transition: var(--t-color);
     }
 
-    /* ── Entry: two-column grid ── */
+    /* ── ENTRY: two-column grid ── */
     .note-entry {
       display: grid;
       grid-template-columns: 108px 1fr;
@@ -171,7 +195,8 @@
     .note-date {
       display: block;
       font-family: var(--font-sans);
-      font-size: 13px; font-weight: 400;
+      font-size: 13px;
+      font-weight: 400;
       color: var(--post-text-2);
       letter-spacing: 0.04em;
       line-height: 1.3;
@@ -207,14 +232,15 @@
       text-decoration: none;
       letter-spacing: 0.04em;
     }
-    .note-entry:hover .note-permalink  { opacity: 0.5; }
-    .note-permalink:hover              { opacity: 1 !important; }
+    .note-entry:hover .note-permalink { opacity: 0.5; }
+    .note-permalink:hover             { opacity: 1 !important; }
 
     .note-content { padding-left: var(--sp-2); }
 
     .note-title {
       font-family: var(--font-serif);
-      font-size: 20px; font-weight: 400;
+      font-size: 20px;
+      font-weight: 400;
       color: var(--post-text);
       margin-bottom: var(--sp-3);
       line-height: 1.35;
@@ -269,9 +295,7 @@
       color: var(--post-text-2);
     }
 
-    /* ── SCROLL-TO-TOP BUTTON ────────────────────────────────────────
-       Appears after scrolling 300px. Matches the blog's minimal style:
-       a small circle with an upward chevron, using post-page tokens.   */
+    /* ── SCROLL-TO-TOP ── */
     #scroll-top {
       position: fixed;
       bottom: 2rem;
@@ -287,7 +311,6 @@
       align-items: center;
       justify-content: center;
       z-index: var(--z-overlay);
-      /* hidden by default */
       opacity: 0;
       visibility: hidden;
       transform: translateY(6px);
@@ -297,13 +320,11 @@
                   box-shadow var(--t-base);
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
-
     #scroll-top.visible {
       opacity: 1;
       visibility: visible;
       transform: translateY(0);
     }
-
     #scroll-top:hover {
       color: var(--post-text);
       border-color: var(--post-text-3);
@@ -311,7 +332,7 @@
       box-shadow: 0 4px 16px rgba(0,0,0,0.12);
     }
 
-    /* ── Footer ── */
+    /* ── FOOTER ── */
     .notes-footer {
       border-top: 0.5px solid var(--post-border);
       padding: var(--sp-5) var(--sp-6);
@@ -326,15 +347,15 @@
     .notes-footer a { color: var(--post-text-3); transition: color var(--t-base); }
     .notes-footer a:hover { color: var(--post-text); }
 
-    /* ── Mobile ── */
+    /* ── MOBILE ── */
     @media (max-width: 640px) {
-      .notes-hero       { min-height: 190px; }
+      .notes-hero        { min-height: 190px; }
       .notes-header-hero { padding: 2rem 1.2rem 2.4rem !important; }
       .notes-wrap        { padding: var(--sp-4) var(--sp-4) var(--sp-7); }
 
       .note-entry  { grid-template-columns: 1fr; gap: var(--sp-2); }
 
-      .note-aside  {
+      .note-aside {
         text-align: left;
         border-right: none;
         border-bottom: 0.5px solid var(--post-border);
@@ -348,11 +369,15 @@
       }
 
       .note-date, .note-year, .note-time { display: inline; margin-top: 0; }
-      .note-permalink  { display: none; }
-      .note-content    { padding-left: 0; padding-top: var(--sp-3); }
+      .note-permalink { display: none; }
+      .note-content   { padding-left: 0; padding-top: var(--sp-3); }
 
-      .notes-footer    { flex-direction: column; gap: var(--sp-2);
-                         text-align: center; padding: var(--sp-4); }
+      .notes-footer {
+        flex-direction: column;
+        gap: var(--sp-2);
+        text-align: center;
+        padding: var(--sp-4);
+      }
 
       #scroll-top { bottom: 1.2rem; right: 1.2rem; }
     }
@@ -372,7 +397,6 @@
 
   <ul class="nav-links">
 
-    <!-- Essays dropdown -->
     <li class="nav-has-dropdown">
       <button class="nav-dropdown-btn" aria-haspopup="true" aria-expanded="false">
         Essays
@@ -393,7 +417,6 @@
       </div>
     </li>
 
-    <!-- Problems dropdown (Phase 2 scaffold) -->
     <li class="nav-has-dropdown">
       <button class="nav-dropdown-btn" aria-haspopup="true" aria-expanded="false">
         Problems
@@ -434,11 +457,13 @@
 </nav>
 
 
-<!-- ══ NOTES HERO — animated geometric network behind the header ══
-     The canvas (#notes-cv) is sized to this container by the animation
-     script. .notes-hero-fade blends the dark band into the page below. -->
+<!-- ══ NOTES HERO — animated geometric network ════════════════
+     #notes-cv is sized by the animation script.
+     .notes-hero-fade blends the dark hero into the page below.
+     The width="1" height="1" attributes prevent the 300×150
+     default canvas flash before JS sets real dimensions.       -->
 <div class="notes-hero">
-  <canvas id="notes-cv" aria-hidden="true"></canvas>
+  <canvas id="notes-cv" width="1" height="1" aria-hidden="true"></canvas>
   <div class="notes-hero-fade"></div>
 
   <header class="notes-header notes-header-hero">
@@ -459,9 +484,7 @@
 <!-- ══ MAIN CONTENT ══════════════════════════════════════════ -->
 <main class="notes-wrap">
 
-  <!-- Thin rule separating hero from entries -->
   <div class="notes-wrap-rule"></div>
-
 
   <!-- ════════════════════════════════════════════════════════
        ADDING A NEW ENTRY — template to copy:
@@ -476,42 +499,41 @@
          <div class="note-content">
            <h3 class="note-title">Optional title</h3>
            <div class="note-text">
-             <p>Your text here. Inline math: $e^{i\pi}+1=0$</p>
-             $$\text{Display math on its own paragraph}$$
-             <p>More text.</p>
+             <p>Your text. Inline math: $e^{i\pi}+1=0$</p>
+             $$\text{Display math}$$
            </div>
          </div>
        </article>
 
        RULES:
-         - Paste new entries ABOVE all existing ones (newest first)
-         - For multiple entries same day: id="note-2026-04-20-2" etc.
-         - Omit <h3 class="note-title"> for untitled entries
-         - Update the entry count in the header above
+         · Paste new entries ABOVE all existing ones (newest first)
+         · For multiple entries same day: id="note-2026-04-20-2" etc.
+         · Omit <h3 class="note-title"> for untitled entries
+         · Update the entry count in the header above
   ════════════════════════════════════════════════════════ -->
 
-<article class="note-entry" id="note-2026-05-28">
-  <aside class="note-aside">
-    <time class="note-date">Thursday 28</time>
-    <span class="note-year">2026</span>
-    <span class="note-time">09:40</span>
-    <a class="note-permalink" href="#note-2026-05-28" title="Link to entry">#</a>
-  </aside>
-  <div class="note-content">
-    <h3 class="note-title"></h3>
-    <div class="note-text">
-      <p>Recently I had been solving a few problems from the ISI BMATH & BSTAT exam 2026 paper(UGB), it was comparatively on the easier side 
-       of difficulty spectrum. I have posted two problems so far(A polynomial and a functional equation problem), and before I post more I feel
-       the need of a separate tag for such posts, So they don't get mixed with theoretical essays, which I haven't posted any yet.
-      </p>
-      
-      <p>I do enjoy problem solving, and will post solutions/problems from other exams that I will find interesting. Those will possibly
-       live in a separate section, which I will start building soon. 
-      </p>
+  <article class="note-entry" id="note-2026-05-28">
+    <aside class="note-aside">
+      <time class="note-date">Thursday 28</time>
+      <span class="note-year">2026</span>
+      <span class="note-time">09:40</span>
+      <a class="note-permalink" href="#note-2026-05-28" title="Link to entry">#</a>
+    </aside>
+    <div class="note-content">
+      <div class="note-text">
+        <p>Recently I had been solving a few problems from the ISI BMATH &amp; BSTAT exam 2026
+          paper (UGB), it was comparatively on the easier side of the difficulty spectrum.
+          I have posted two problems so far (a polynomial and a functional equation problem),
+          and before I post more I feel the need of a separate tag for such posts, so they
+          don't get mixed with theoretical essays, which I haven't posted any yet.
+        </p>
+        <p>I do enjoy problem solving, and will post solutions/problems from other exams that
+          I find interesting. Those will possibly live in a separate section, which I will
+          start building soon.
+        </p>
+      </div>
     </div>
-  </div>
-</article>
-
+  </article>
 
   <article class="note-entry" id="note-2026-04-20">
     <aside class="note-aside">
@@ -524,30 +546,31 @@
       <h3 class="note-title">My Very First Note</h3>
       <div class="note-text">
         <p>
-          I've had this wish for a long time to have my own blog, partly because I find it very 
-          helpful to keep track of my undersanding of a piece of mathematics.  
+          I've had this wish for a long time to have my own blog, partly because I find it
+          very helpful to keep track of my understanding of a piece of mathematics.
         </p>
         <p>
-          One of the biggest challenges while learning new math, I feel, is to avoid superficial
-          understanding. Often the feeling that 'I know this' doesn't reflect the reality of understanding.
-          One of the best ways to overcome this is to explain the math to others.
-        </p>
-        <p> At the moment, I don't have many peers to regularly discuss math with. So, I decided an approach which has the 
-          immense ability to reach a greater number of math enthusiasts (who, I hope, are in abundance in the great sea of the internet!)
-          and take their perspective on the math. It is a highly rewarding experience to learn different tools and approaches.
-        </p>
-        <p> 
-            I will try to keep this Blog active throughout the undergraduate years. This page (as you've probably already noticed)
-            will primarily consist of the half-formed ideas, or informal notes, occasional updates. In contrast,
-            the posts will be (atleast tried to be) more rigorous and structured pieces of math, not denying the fact that it can contain errors, 
-            which is why the posts have a comment section(Giscus) for the readers, who can point out errors, or provide extended
-            view of the topic, or offer different perspective. In the initial days posts may take longer to come. I may change the UI, introduce new sections
-            (if relevant) as the blog evolves. For now, this is where it begins.
-            
+          One of the biggest challenges while learning new math, I feel, is to avoid
+          superficial understanding. Often the feeling that "I know this" doesn't reflect
+          the reality of understanding. One of the best ways to overcome this is to explain
+          the math to others.
         </p>
         <p>
-            Thank you.
+          At the moment, I don't have many peers to regularly discuss math with. So I decided
+          on an approach which has the immense ability to reach a greater number of math
+          enthusiasts (who, I hope, are in abundance in the great sea of the internet!) and
+          take their perspective on the math. It is a highly rewarding experience to learn
+          different tools and approaches.
         </p>
+        <p>
+          I will try to keep this blog active throughout the undergraduate years. This page
+          will primarily consist of half-formed ideas, informal notes, and occasional
+          updates. In contrast, the posts will be (at least tried to be) more rigorous and
+          structured pieces of math. In the initial days posts may take longer to come.
+          I may change the UI and introduce new sections as the blog evolves. For now, this
+          is where it begins.
+        </p>
+        <p>Thank you.</p>
       </div>
     </div>
   </article>
@@ -566,9 +589,7 @@
 </footer>
 
 
-<!-- ══ SCROLL TO TOP BUTTON ══════════════════════════════════
-     Appears after scrolling 300px down. Disappears at the top.
-     Uses the post-page colour tokens so it adapts to dark mode. -->
+<!-- ══ SCROLL TO TOP ═══════════════════════════════════════ -->
 <button id="scroll-top" aria-label="Scroll to top" title="Back to top">
   <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
     <path d="M1 7.5l4.5-4.5L10 7.5"
@@ -578,7 +599,7 @@
 </button>
 
 
-<!-- Dark mode toggle script -->
+<!-- Dark mode toggle -->
 <script>
 (function(){
   function syncIcon(t){
@@ -599,21 +620,14 @@
 })();
 </script>
 
-<!-- Scroll-to-top logic -->
+<!-- Scroll-to-top -->
 <script>
 (function () {
   var btn = document.getElementById('scroll-top');
   if (!btn) return;
-
-  /* Show after 300px of scroll, hide near the very top */
   window.addEventListener('scroll', function () {
-    if (window.scrollY > 300) {
-      btn.classList.add('visible');
-    } else {
-      btn.classList.remove('visible');
-    }
+    btn.classList.toggle('visible', window.scrollY > 300);
   }, { passive: true });
-
   btn.addEventListener('click', function () {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
