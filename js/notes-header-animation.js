@@ -6,20 +6,23 @@
      · Sage-green edges + primary nodes  (echoes the landscape hills)
      · Warm amber accent nodes (~11%)    (echoes the house-window glow)
      · Dim sage nodes (~25%)             (background depth)
-     · Faint triangle fills              (geometric richness)
+     · Faint triangle fills              (desktop only — too heavy on mobile)
 
    Pure Canvas 2D. No dependencies. IIFE wrapped.
    · Pauses via IntersectionObserver when scrolled off-screen.
    · Redraws on resize via ResizeObserver.
    · Respects prefers-reduced-motion (single static frame).
+   · Mobile-aware: fewer nodes, no triangles, lighter edges.
 ================================================================ */
 (function () {
   'use strict';
 
   /* ── Tunable constants ───────────────────────────────────── */
-  var NUM_NODES = 68;
-  var MAX_DIST  = 168;   /* px — max distance for an edge to appear   */
-  var SPEED     = 0.19;  /* px/frame — max node velocity              */
+  var NUM_NODES_DESKTOP = 68;
+  var NUM_NODES_MOBILE  = 32;   /* ≤ 640 px wide                             */
+  var MAX_DIST_DESKTOP  = 168;  /* px — max distance for an edge to appear   */
+  var MAX_DIST_MOBILE   = 110;  /* tighter network on small screens          */
+  var SPEED             = 0.19; /* px/frame — max node velocity              */
 
   /* ── Palette ────────────────────────────────────────────────
      Sage  → edge lines + most nodes
@@ -28,8 +31,6 @@
   var SR = 122, SG = 168, SB = 84;   /* sage  */
   var AR = 232, AG = 166, AB = 38;   /* amber */
   var DR = 72,  DG = 104, DB = 48;   /* dim   */
-
-  var MD2 = MAX_DIST * MAX_DIST;
 
   /* ─────────────────────────────────────────────────────────
      init() — called once the DOM is ready.
@@ -43,15 +44,25 @@
     if (!ctx) return;
 
     /* ── Node pool ─────────────────────────────────────────── */
-    var nodes = [];
+    var nodes    = [];
+    var isMobile = false;
+    var MD2      = MAX_DIST_DESKTOP * MAX_DIST_DESKTOP;
+    var MAX_DIST = MAX_DIST_DESKTOP;
 
     function buildNodes(W, H) {
+      isMobile = W <= 640;
+      var NUM_NODES = isMobile ? NUM_NODES_MOBILE : NUM_NODES_DESKTOP;
+      MAX_DIST = isMobile ? MAX_DIST_MOBILE : MAX_DIST_DESKTOP;
+      MD2      = MAX_DIST * MAX_DIST;
+
       nodes = [];
       for (var i = 0; i < NUM_NODES; i++) {
         var roll   = Math.random();
         var accent = roll < 0.11;
         var dim    = !accent && roll > 0.72;
         var spd    = SPEED * (0.40 + Math.random() * 0.60);
+        /* Mobile: slow nodes down a touch so the network feels calmer */
+        if (isMobile) spd *= 0.70;
         var ang    = Math.random() * 6.2832;
         nodes.push({
           x:    Math.random() * W,
@@ -108,7 +119,8 @@
           if (d2ij > MD2) continue;
           var tij = 1 - Math.sqrt(d2ij) / MAX_DIST;
 
-          if (tij > 0.40) {
+          /* Triangle fills — desktop only (O(n³) is too heavy on mobile) */
+          if (!isMobile && tij > 0.40) {
             for (var k = j + 1; k < nn; k++) {
               var nk   = nodes[k];
               var dxik = ni.x - nk.x, dyik = ni.y - nk.y;
@@ -129,11 +141,14 @@
             }
           }
 
+          /* Mobile: slightly thinner, slightly more transparent edges */
+          var alpha   = isMobile ? tij * 0.28 : tij * 0.37;
+          var lwidth  = isMobile ? tij * 0.70 + 0.10 : tij * 0.90 + 0.15;
           ctx.beginPath();
           ctx.moveTo(ni.x, ni.y);
           ctx.lineTo(nj.x, nj.y);
-          ctx.strokeStyle = 'rgba(' + SR + ',' + SG + ',' + SB + ',' + (tij * 0.37) + ')';
-          ctx.lineWidth   = tij * 0.90 + 0.15;
+          ctx.strokeStyle = 'rgba(' + SR + ',' + SG + ',' + SB + ',' + alpha + ')';
+          ctx.lineWidth   = lwidth;
           ctx.stroke();
         }
       }
@@ -192,7 +207,6 @@
     function kickOff() {
       fit();
       if (canvas.width < 2 || canvas.height < 2) {
-        /* Parent not laid out yet — wait one more frame and retry */
         requestAnimationFrame(kickOff);
         return;
       }
@@ -218,9 +232,6 @@
       new IntersectionObserver(function (entries) {
         if (!ioInitDone) { ioInitDone = true; return; }
         var visible = entries[0].isIntersecting;
-        /* Only allow a pause AFTER the loop has drawn at least one frame.
-           Before that, a spurious isIntersecting:false from an unsettled
-           layout must not kill the animation permanently.               */
         if (loopLive || visible) {
           paused = !visible;
           if (!paused) startLoop();
@@ -229,13 +240,13 @@
     }
 
     /* ── ResizeObserver — rebuild nodes on resize ────────────
-       Also restarts the loop if it died during a zero-dim init. */
+       Also restarts the loop if it died during a zero-dim init.
+       Re-evaluates mobile breakpoint on every resize.           */
     if (typeof ResizeObserver !== 'undefined') {
       new ResizeObserver(function () {
         fit();
         if (canvas.width > 0 && canvas.height > 0) {
           buildNodes(canvas.width, canvas.height);
-          /* If loop never started (zero-dim at init time), start it now */
           if (!loopActive && !paused &&
               !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             startLoop();

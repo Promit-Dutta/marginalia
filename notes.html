@@ -76,6 +76,8 @@
       position: absolute;
       inset: 0;
       display: block;
+      pointer-events: none;   /* ← ADD: stops canvas eating touch events */
+      touch-action: none;     /* ← ADD: tells browser scroll is safe to proceed */
     }
 
     /* Gradient fades dark hero into the page below */
