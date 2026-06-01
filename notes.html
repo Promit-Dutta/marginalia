@@ -60,52 +60,93 @@
       flex-direction: column;
     }
 
+    /* ── NOTES HERO — canvas animation header ────────────────────────
+       Dark band at top of page. Canvas animation renders behind the
+       header text. A gradient at the bottom fades into the page bg.   */
+    .notes-hero {
+      position: relative;
+      width: 100%;
+      min-height: 230px;
+      background: #07100a;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    /* Canvas fills the hero entirely; animation JS sizes it to parent. */
+    #notes-cv {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Gradient melts the dark hero into the light post page below.
+       Uses var(--post-bg) so it adapts correctly in dark mode.        */
+    .notes-hero-fade {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 90px;
+      background: linear-gradient(to bottom, transparent, var(--post-bg));
+      z-index: 1;
+      pointer-events: none;
+      transition: background var(--t-slow);
+    }
+
+    /* Header text sits above canvas (z:2) and above fade (z:1).       */
+    .notes-header-hero {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      /* override the default notes-header border/margin */
+      border-bottom: none !important;
+      margin-bottom: 0 !important;
+      padding: 2.8rem 2rem 3rem !important;
+    }
+
+    /* Light-on-dark colour overrides for title and desc inside hero.  */
+    .notes-header-hero .notes-title {
+      color: #dde8c8;
+      text-shadow: 0 1px 24px rgba(0,0,0,0.65), 0 0 44px rgba(0,0,0,0.40);
+    }
+
+    .notes-header-hero .notes-desc {
+      color: rgba(168, 205, 128, 0.78);
+      text-shadow: 0 1px 10px rgba(0,0,0,0.52);
+    }
+
+    .notes-header-hero .notes-entry-count {
+      color: rgba(148, 180, 100, 0.65);
+    }
+
+    /* Shift the tag to use dark-mode-style colours on the dark hero.  */
+    .notes-header-hero .tag-notes {
+      background: rgba(60, 36, 10, 0.72);
+      color: #d4a060;
+      border-color: rgba(170, 110, 35, 0.38);
+    }
+
     /* ── Main wrapper ── */
     .notes-wrap {
       max-width: 760px;
       margin: 0 auto;
-      padding: var(--sp-7) var(--sp-6) var(--sp-8);
+      /* reduce top padding — hero already provides visual breathing room */
+      padding: var(--sp-5) var(--sp-6) var(--sp-8);
       flex: 1;
     }
 
-    /* ── Page header ── */
-    .notes-header {
-      margin-bottom: var(--sp-7);
-      padding-bottom: var(--sp-5);
-      border-bottom: 0.5px solid var(--post-border);
-    }
-
-    .notes-title {
-      font-family: var(--font-display);
-      font-size: clamp(32px,5vw,44px);
-      font-weight: 300;
-      letter-spacing: 0.04em;
-      color: var(--post-text);
-      line-height: 1.1;
-      margin-bottom: var(--sp-3);
-    }
-
-    .notes-desc {
-      font-family: var(--font-serif);
-      font-style: italic;
-      font-size: 16px;
-      color: var(--post-text-3);
-      line-height: 1.65;
-      max-width: 520px;
-      margin-bottom: var(--sp-4);
-    }
-
-    .notes-header-meta {
-      display: flex;
-      align-items: center;
-      gap: var(--sp-4);
-    }
-
-    .notes-entry-count {
-      font-family: var(--font-serif);
-      font-style: italic;
-      font-size: 13px;
-      color: var(--post-text-3);
+    /* Thin rule that separates hero bottom from the first entry.
+       Sits at the very top of .notes-wrap.                            */
+    .notes-wrap-rule {
+      height: 0.5px;
+      background: var(--post-border);
+      margin-bottom: var(--sp-6);
+      transition: var(--t-color);
     }
 
     /* ── Entry: two-column grid ── */
@@ -228,6 +269,48 @@
       color: var(--post-text-2);
     }
 
+    /* ── SCROLL-TO-TOP BUTTON ────────────────────────────────────────
+       Appears after scrolling 300px. Matches the blog's minimal style:
+       a small circle with an upward chevron, using post-page tokens.   */
+    #scroll-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 34px;
+      height: 34px;
+      border: 0.5px solid var(--post-border);
+      border-radius: 50%;
+      background: var(--post-bg);
+      color: var(--post-text-3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: var(--z-overlay);
+      /* hidden by default */
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(6px);
+      transition: opacity 0.30s ease, visibility 0.30s ease,
+                  transform 0.30s ease, color var(--t-base),
+                  border-color var(--t-base), background var(--t-base),
+                  box-shadow var(--t-base);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    #scroll-top.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    #scroll-top:hover {
+      color: var(--post-text);
+      border-color: var(--post-text-3);
+      background: var(--post-code-bg);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+
     /* ── Footer ── */
     .notes-footer {
       border-top: 0.5px solid var(--post-border);
@@ -245,7 +328,9 @@
 
     /* ── Mobile ── */
     @media (max-width: 640px) {
-      .notes-wrap  { padding: var(--sp-5) var(--sp-4) var(--sp-7); }
+      .notes-hero       { min-height: 190px; }
+      .notes-header-hero { padding: 2rem 1.2rem 2.4rem !important; }
+      .notes-wrap        { padding: var(--sp-4) var(--sp-4) var(--sp-7); }
 
       .note-entry  { grid-template-columns: 1fr; gap: var(--sp-2); }
 
@@ -268,6 +353,8 @@
 
       .notes-footer    { flex-direction: column; gap: var(--sp-2);
                          text-align: center; padding: var(--sp-4); }
+
+      #scroll-top { bottom: 1.2rem; right: 1.2rem; }
     }
   </style>
 </head>
@@ -347,10 +434,14 @@
 </nav>
 
 
-<!-- ══ MAIN CONTENT ══════════════════════════════════════════ -->
-<main class="notes-wrap">
+<!-- ══ NOTES HERO — animated geometric network behind the header ══
+     The canvas (#notes-cv) is sized to this container by the animation
+     script. .notes-hero-fade blends the dark band into the page below. -->
+<div class="notes-hero">
+  <canvas id="notes-cv" aria-hidden="true"></canvas>
+  <div class="notes-hero-fade"></div>
 
-  <header class="notes-header">
+  <header class="notes-header notes-header-hero">
     <h1 class="notes-title">Marginal Notes</h1>
     <p class="notes-desc">
       A running notebook. Not polished essays — just current readings,
@@ -362,6 +453,14 @@
       <span class="notes-entry-count">2 entries</span>
     </div>
   </header>
+</div>
+
+
+<!-- ══ MAIN CONTENT ══════════════════════════════════════════ -->
+<main class="notes-wrap">
+
+  <!-- Thin rule separating hero from entries -->
+  <div class="notes-wrap-rule"></div>
 
 
   <!-- ════════════════════════════════════════════════════════
@@ -467,6 +566,18 @@
 </footer>
 
 
+<!-- ══ SCROLL TO TOP BUTTON ══════════════════════════════════
+     Appears after scrolling 300px down. Disappears at the top.
+     Uses the post-page colour tokens so it adapts to dark mode. -->
+<button id="scroll-top" aria-label="Scroll to top" title="Back to top">
+  <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+    <path d="M1 7.5l4.5-4.5L10 7.5"
+          stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+
 <!-- Dark mode toggle script -->
 <script>
 (function(){
@@ -488,6 +599,28 @@
 })();
 </script>
 
+<!-- Scroll-to-top logic -->
+<script>
+(function () {
+  var btn = document.getElementById('scroll-top');
+  if (!btn) return;
+
+  /* Show after 300px of scroll, hide near the very top */
+  window.addEventListener('scroll', function () {
+    if (window.scrollY > 300) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+  }, { passive: true });
+
+  btn.addEventListener('click', function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();
+</script>
+
 <script src="js/nav-dropdown.js"></script>
+<script src="js/notes-header-animation.js"></script>
 </body>
 </html>
