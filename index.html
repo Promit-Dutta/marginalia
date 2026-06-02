@@ -783,6 +783,7 @@
     loader.style.display = 'none';
     home.style.display   = 'flex';
     home.classList.add('visible');
+    document.getElementById('geo-bg').style.opacity = '1';
     if (location.hash === '#about') {
       setTimeout(() => {
         const el = document.getElementById('about');
@@ -899,7 +900,8 @@
         document.documentElement.style.overflow=''; /* restore — CSS overflow-y:scroll resumes */
         loader.style.display='none';
         home.style.display='flex';
-        requestAnimationFrame(()=>requestAnimationFrame(()=>home.classList.add('visible')));
+        requestAnimationFrame(()=>requestAnimationFrame(()=> { home.classList.add('visible');
+      document.getElementById('geo-bg').style.opacity = '1';}));
       },600);
     }
   }
