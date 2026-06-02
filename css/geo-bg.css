@@ -1,31 +1,73 @@
 /* ================================================================
    geo-bg.css — Isometric animation canvas + landscape trim.
-   Link in index.html ONLY, after watercolor.css.
+   Loaded on index.html ONLY (after watercolor.css).
 
-   z-index stack (relevant layers):
-     #geo-bg canvas  : -2   deepest — draws the dark-blue field
-     .landscape-bg   : -1   var(--z-below) — painted on top of canvas
-     .page-scrim     :  2   var(--z-raised) — softens the transition band
-     .page-content   :  2   sits above scrim via its own stacking context
+   z-index stack:
+     #geo-bg canvas  : -2  deepest — the dark-blue animation field
+     .landscape-bg   : -1  painted SVG on top of canvas
+     .page-scrim     :  2  softens landscape→animation seam
+     .page-content   :  2  all page elements above scrim
+
+   VISIBILITY ZONE: the canvas is CSS-masked so it only shows
+   from below the about card to the bottom of the viewport.
+     Desktop : fades in 52 % → 66 % of viewport height
+     Mobile  : fades in 65 % → 80 % of viewport height
+   The landscape-bg mask (45 %→68 %) overlaps smoothly with these.
 ================================================================ */
 
 /* ── Animation canvas ─────────────────────────────────────── */
 #geo-bg {
   position: fixed;
   inset: 0;
-  z-index: -2;          /* behind the landscape SVG at z-index:-1  */
+  z-index: -2;
   width: 100%;
   height: 100%;
-  pointer-events: none; /* never intercepts clicks or touch         */
+  pointer-events: none;
+
+  /* ── Constrain to lower viewport: below about card ──────────
+     Transparent in the hero + about-card zone.
+     Fades in from ~52 % of viewport height, fully visible by 66 %.
+     This means the animation appears from below the about card
+     and fills down to the footer.                              */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 52%,
+    black       66%,
+    black       100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 52%,
+    black       66%,
+    black       100%
+  );
 }
 
-/* ── Landscape mask — soft fade at the bottom ────────────────
-   Painting is fully visible for the top 45 % of the viewport,
-   then dissolves to transparent by 68 %, letting the isometric
-   grid animation show through below.
+/* Mobile: about card extends lower relative to viewport height  */
+@media (max-width: 640px) {
+  #geo-bg {
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent 65%,
+      black       80%,
+      black       100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent 65%,
+      black       80%,
+      black       100%
+    );
+  }
+}
 
-   TUNING: if your hero or about-section is taller/shorter,
-   slide both percentages up or down together (keep ~23 % gap). */
+/* ── Landscape mask — unchanged, fades from 45 % to 68 % ─────
+   The landscape dissolves over the same zone where the canvas
+   fades in (52–66 %), creating a smooth crossfade.            */
 .landscape-bg {
   -webkit-mask-image: linear-gradient(
     to bottom,
@@ -41,13 +83,11 @@
   );
 }
 
-/* ── Page scrim — re-tuned for the deep-blue lower zone ──────
-   Swap to a neutral navy tint; the animation is already very
-   dark — only a whisper of overlay to smooth the seam.        */
+/* ── Page scrim — light navy overlay to smooth the seam ──────  */
 .page-scrim {
   background: linear-gradient(
     to top,
-    rgba(4, 10, 22, 0.20),
+    rgba(4, 10, 22, 0.22),
     rgba(4, 10, 22, 0.06) 55%,
     transparent
   );
@@ -56,58 +96,61 @@
 [data-theme="dark"] .page-scrim {
   background: linear-gradient(
     to top,
-    rgba(2, 6, 18, 0.36),
-    rgba(2, 6, 18, 0.09) 55%,
+    rgba(2, 6, 18, 0.38),
+    rgba(2, 6, 18, 0.10) 55%,
     transparent
   );
 }
 
-/* ── Footer quote — legible over dark animation ──────────────
-   Blue-tinted white sits naturally on a deep-navy field.      */
+/* ── Footer quote ── ─────────────────────────────────────────  */
 .footer-quote {
   font-size: 13px;
-  color: rgba(195, 218, 255, 0.80);
-  text-shadow: 0 1px 8px rgba(0, 5, 25, 0.85);
+  color: rgba(195, 218, 255, 0.82);
+  text-shadow: 0 1px 8px rgba(0, 5, 25, 0.90);
 }
 
-/* ── Footer links — apparent and legible over the animation ──
-   Using .footer .footer-links selectors to beat the lower-
-   specificity .footer-links rules in layout.css regardless of
-   cascade order.
-   Visual treatment: subtle dark-blue pill with glass sheen,
-   bright text and a soft glow on hover.                       */
+/* ── Footer links — prominent pill buttons over dark animation ─
+   Uses .footer .footer-links (two-class specificity) to win over
+   the single-class rules in layout.css regardless of load order. */
 .footer .footer-links {
   display: flex;
-  gap: 0.6rem;
+  gap: 0.55rem;
   align-items: center;
 }
 
 .footer .footer-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 400;
   letter-spacing: 0.05em;
-  color: rgba(210, 232, 255, 0.95);
-  text-shadow: 0 1px 6px rgba(0, 5, 30, 0.90);
-  /* pill treatment */
-  padding: 5px 11px;
-  border: 0.5px solid rgba(100, 158, 255, 0.32);
+  color: rgba(215, 238, 255, 0.97);
+  text-shadow: 0 1px 6px rgba(0, 8, 40, 0.95);
+  padding: 5px 13px;
+  border: 0.5px solid rgba(100, 165, 255, 0.38);
   border-radius: 4px;
-  background: rgba(12, 30, 72, 0.50);
-  transition: color var(--t-base), background var(--t-base),
-              border-color var(--t-base), text-shadow var(--t-base);
+  background: rgba(10, 28, 80, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: color       0.18s ease,
+              background  0.18s ease,
+              border-color 0.18s ease,
+              box-shadow  0.18s ease;
+  text-decoration: none;
 }
 
 .footer .footer-links a:hover {
-  color: rgba(242, 252, 255, 1.0);
-  background: rgba(28, 68, 168, 0.58);
-  border-color: rgba(140, 195, 255, 0.58);
-  text-shadow: 0 1px 12px rgba(0, 10, 60, 0.95);
+  color: #ffffff;
+  background: rgba(30, 80, 200, 0.62);
+  border-color: rgba(150, 205, 255, 0.65);
+  box-shadow: 0 0 14px rgba(80, 155, 255, 0.35);
+  text-shadow: 0 0 10px rgba(130, 200, 255, 0.55);
 }
 
-/* Keep SVGs that live inside the pill anchors sized correctly  */
 .footer .footer-links a svg {
   display: inline-block;
-  vertical-align: -2px;
   flex-shrink: 0;
+  vertical-align: middle;
 }
