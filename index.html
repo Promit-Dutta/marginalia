@@ -226,40 +226,31 @@
       }
     }
 
-    /* ── Mobile hero text: force light colour + dark halo ──────────
-       On desktop the title sits above the dark tree-line (sky / hill
-       zone). On mobile the SVG scales to fill the full viewport height,
-       which pushes the dark trees and foreground band up into the title
-       zone. var(--text) in light mode is a dark colour — invisible over
-       the dark landscape. This rule, scoped to <=640px, forces every hero
-       text element to a light cream-green and wraps it in a strong dark
-       shadow halo so it reads on any part of the painting in both modes.
-
-       PLACEMENT: at the very end of the style block in head,
-       immediately before the closing style tag.
-       The existing .site-title / .site-tagline / .hero-eq rules are
-       untouched — this block simply wins the cascade by appearing later. */
-    @media (max-width: 640px) {
-      .site-title {
-        color: #e8f0dc;
-        text-shadow:
-          0 2px 18px rgba(0, 0, 0, 0.92),
-          0 0  44px rgba(0, 0, 0, 0.82),
-          0 4px  8px rgba(0, 0, 0, 0.97);
-      }
-      .site-tagline {
-        color: rgba(228, 240, 210, 0.90);
-        text-shadow:
-          0 1px 10px rgba(0, 0, 0, 0.90),
-          0 0  24px rgba(0, 0, 0, 0.78);
-      }
-      .hero-eq {
-        color: rgba(210, 228, 192, 0.80);
-        text-shadow:
-          0 1px  8px rgba(0, 0, 0, 0.88),
-          0 0  18px rgba(0, 0, 0, 0.72);
-      }
-    }
+    /* ── Mobile light mode: dark text + white glow halo ─────────────
+   The sky/hill zone behind the title is pale in light mode.
+   var(--text) colours are used directly; white shadows give contrast
+   against whichever part of the painting sits behind the text.     */
+   @media (max-width: 640px) {
+     [data-theme="light"] .site-title {
+     color: #1e261a;
+     text-shadow:
+      0 0 14px rgba(255, 255, 255, 0.96),
+      0 0 32px rgba(255, 255, 255, 0.82),
+      0 2px  8px rgba(255, 255, 255, 0.94);
+     }
+     [data-theme="light"] .site-tagline {
+     color: #4a5c38;
+     text-shadow:
+      0 0 10px rgba(255, 255, 255, 0.92),
+      0 0 24px rgba(255, 255, 255, 0.76);
+     }
+     [data-theme="light"] .hero-eq {
+     color: #7a8e68;
+     text-shadow:
+      0 0  8px rgba(255, 255, 255, 0.88),
+      0 0 18px rgba(255, 255, 255, 0.72);
+  }
+}
   </style>
 </head>
 <body>
