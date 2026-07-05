@@ -39,6 +39,7 @@ CSS_DIR     = os.path.join(BASE_DIR, "css")
 JS_DIR      = os.path.join(BASE_DIR, "js")
 ASSETS_DIR  = os.path.join(BASE_DIR, "assets")
 STATIC_DIR  = os.path.join(BASE_DIR, "static")
+CHESS_DIR   = os.path.join(BASE_DIR, "chess")
 
 # Master tag list — order controls the filter row in the listing page.
 # Tags with no posts still appear as normal buttons; clicking them shows
@@ -401,6 +402,12 @@ def build_listing_html(posts):
 
       <li><a href="notes.html">Marginal Notes</a></li>
       <li><a href="index.html#about">About</a></li>
+      <li class="nav-chess-item">
+        <a href="chess/index.html" class="nav-chess-link" title="Chess — mathematics of chess">
+          <span class="nav-chess-icon" aria-hidden="true">&#9822;</span>
+          Chess
+        </a>
+      </li>
 
     </ul>
     <button id="theme-toggle" aria-label="Toggle dark mode">
@@ -711,6 +718,12 @@ def build_problems_html(posts):
 
       <li><a href="notes.html">Marginal Notes</a></li>
       <li><a href="index.html#about">About</a></li>
+      <li class="nav-chess-item">
+        <a href="chess/index.html" class="nav-chess-link" title="Chess — mathematics of chess">
+          <span class="nav-chess-icon" aria-hidden="true">&#9822;</span>
+          Chess
+        </a>
+      </li>
 
     </ul>
     <button id="theme-toggle" aria-label="Toggle dark mode">
@@ -857,6 +870,29 @@ def js_files(filename):
 @app.route("/notes.html")
 def notes():
     return send_from_directory(BASE_DIR, "notes.html")
+
+
+@app.route("/chess/")
+@app.route("/chess")
+@app.route("/chess/index.html")
+
+
+def chess_index():
+    return send_from_directory(CHESS_DIR, "index.html")
+
+
+@app.route("/chess/topics.html")
+@app.route("/chess/topics")
+def chess_topics():
+    return send_from_directory(CHESS_DIR, "topics.html")
+
+
+
+@app.route("/chess/knight-tour.html")
+@app.route("/chess/knight-tour")
+def chess_knight_tour():
+    return send_from_directory(CHESS_DIR, "knight-tour.html")
+
 
 
 @app.route("/assets/<path:filename>")

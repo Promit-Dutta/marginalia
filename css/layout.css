@@ -633,3 +633,74 @@ body {
     overflow-y: auto;
   }
 }
+
+/* ================================================================
+   CHESS NAV LINK — appended block (additive only).
+   Marks the Chess section entry point as visually distinct from
+   ordinary nav links/tags, per the Chess section plan. Does not
+   modify any rule above. Used by index.html, notes.html,
+   posts.html, problems.html, and every posts/*.html page.
+================================================================ */
+.nav-chess-item {
+  display: flex;
+  align-items: center;
+}
+
+.nav-links a.nav-chess-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  border: 1px solid rgba(110, 140, 190, 0.35);
+  background: rgba(110, 140, 190, 0.07);
+  border-radius: 20px;
+  padding: 5px 13px 5px 10px;
+  white-space: nowrap;
+  transition: color var(--t-base), border-color var(--t-base),
+              background var(--t-base), box-shadow var(--t-base);
+}
+
+.nav-links a.nav-chess-link:hover {
+  color: var(--text);
+  border-color: rgba(110, 140, 190, 0.65);
+  background: rgba(110, 140, 190, 0.14);
+  box-shadow: 0 0 10px rgba(110, 140, 190, 0.22);
+}
+
+.nav-chess-icon {
+  font-size: 13px;
+  line-height: 1;
+  transform: translateY(-0.5px);
+}
+
+[data-theme="dark"] .nav-links a.nav-chess-link {
+  border-color: rgba(130, 165, 220, 0.30);
+  background: rgba(130, 165, 220, 0.08);
+}
+[data-theme="dark"] .nav-links a.nav-chess-link:hover {
+  border-color: rgba(130, 165, 220, 0.55);
+  background: rgba(130, 165, 220, 0.16);
+  box-shadow: 0 0 12px rgba(130, 165, 220, 0.28);
+  color: var(--text);
+}
+
+/* Mobile drawer: pill stays a compact inline pill, not a full-width
+   block row like the plain text links above it. */
+@media (max-width: 768px) {
+  #main-nav ul.nav-links > li.nav-chess-item {
+    display: flex;
+    align-items: center;
+    padding: var(--sp-3) var(--sp-5);
+    border-bottom: 0.5px solid var(--border);
+  }
+  #main-nav ul.nav-links > li.nav-chess-item > a.nav-chess-link {
+    display: inline-flex;
+    padding: 6px 14px 6px 11px;
+    font-size: 11px;
+    border-bottom: none;
+  }
+}

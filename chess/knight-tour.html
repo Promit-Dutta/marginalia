@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Closed Knight's Tour — Chess — Marginalia</title>
+<meta name="description" content="An interactive exploration of the closed knight's tour problem — pick a board size, watch the search, and see why some boards are impossible."/>
+<meta name="robots" content="noindex"/>
+<script>
+  (function(){
+    var s=localStorage.getItem('mg-theme');
+    var d=window.matchMedia('(prefers-color-scheme:dark)').matches;
+    document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));
+  })();
+</script>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=EB+Garamond:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400&display=swap"/>
+<link rel="stylesheet" href="../css/base.css"/>
+<style>
+/* ==================================================================
+   chess/knight-tour.html — page-scoped styles only, prefixed .kt-.
+   Implements chess-board-animation-spec.md (glass/frosted theme,
+   §8d variable board sizing) and the layout order fixed in the
+   section plan: parameters -> board -> cards -> graph.
+
+   IMPORTANT DEVIATION FROM THE STATIC SPEC, NOTED HONESTLY:
+   The original animation spec's CSS @keyframes timing-percentage
+   system was designed for one fixed, known move. A knight's tour
+   has m*n-1 moves whose count varies with the user's board size,
+   and needs to be scrubbable/steppable — that can't be expressed as
+   a fixed CSS animation. So playback here is JS-driven: each frame
+   re-renders the trace/highlight state for the current step index.
+   The VISUAL LANGUAGE (glass palette, glow halo, fading trace,
+   moderate glyph size) is carried over unchanged; only the mechanism
+   that drives it had to change from CSS keyframes to JS state.
+   ================================================================== */
+
+body.kt-page { min-height: 100vh; overflow-x: hidden; }
+
+.kt-inner {
+  --kt-bg:        #FAFAF8;
+  --kt-text:      #1E2430;
+  --kt-text-2:    #3C4657;
+  --kt-text-3:    #737C8C;
+  --kt-border:    rgba(30, 36, 48, 0.12);
+  --kt-border-2:  rgba(30, 36, 48, 0.24);
+  --kt-card:      rgba(30, 36, 48, 0.04);
+  --kt-accent:    #26344A;
+
+  /* Glass/frosted board palette — fixed identity, per animation spec §8a */
+  --kt-board-bg:     #0B1220;
+  --kt-sq-light:     #E8F1F5;
+  --kt-sq-dark:      #26344A;
+  --kt-piece-fill:   #FFFFFF;
+  --kt-piece-stroke: #16202C;
+  --kt-border-glass: #3A4A63;
+  --kt-trace-main:   #FFFFFF;
+  --kt-trace-halo:   #000000;
+  --kt-visited-tint: rgba(255,255,255,0.10);
+  --kt-current-tint: rgba(255,255,255,0.42);
+  --kt-start-ring:   #7FD9C4;
+  --kt-visited-ring: #FFD166;
+
+  /* Light mode: --kt-accent is dark navy, so white button text reads
+     fine. Dark mode flips --kt-accent to a light icy tone, so this
+     needs to flip too — see the dark-mode override block below. */
+  --kt-generate-text: #FFFFFF;
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--kt-bg);
+  color: var(--kt-text);
+  opacity: 0;
+  transition: opacity 0.5s ease, background 0.4s ease, color 0.4s ease;
+}
+.kt-inner.visible { opacity: 1; }
+
+[data-theme="dark"] .kt-inner {
+  --kt-bg:       #0A0908;
+  --kt-text:     #ECECE8;
+  --kt-text-2:   #C6C6C0;
+  --kt-text-3:   #8A8A83;
+  --kt-border:   rgba(236,236,232,0.12);
+  --kt-border-2: rgba(236,236,232,0.22);
+  --kt-card:     rgba(255,255,255,0.045);
+  --kt-accent:   #E8F1F5;
+  /* --kt-accent is now light, so the button background is light too —
+     text needs to flip to a deep ink color to stay readable. */
+  --kt-generate-text: #12202C;
+}
+
+/* ── TOP BAR ─────────────────────────────────────────────────── */
+.kt-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px clamp(20px, 5vw, 40px);
+  border-bottom: 1px solid var(--kt-border);
+}
+.kt-back-link {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--font-sans); font-size: 12.5px; letter-spacing: 0.06em;
+  color: var(--kt-text-3); transition: color 0.2s ease;
+}
+.kt-back-link:hover { color: var(--kt-text); }
+.kt-theme-toggle {
+  all: unset; display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid var(--kt-border-2); color: var(--kt-text-3);
+  cursor: pointer; transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.kt-theme-toggle:hover { color: var(--kt-text); border-color: var(--kt-text-3); background: var(--kt-card); }
+
+/* ── PAGE HEADER ─────────────────────────────────────────────── */
+.kt-wrap { width: 100%; max-width: 760px; margin: 0 auto; padding: clamp(2.4rem,7vw,3.6rem) var(--sp-5) 5rem; flex: 1; }
+.kt-eyebrow { font-family: var(--font-sans); font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--kt-text-3); margin-bottom: 0.7rem; }
+.kt-title { font-family: var(--font-display); font-style: italic; font-weight: 300; font-size: clamp(32px,6.5vw,46px); margin-bottom: 0.9rem; }
+.kt-intro { font-family: var(--font-serif); font-size: 17px; line-height: 1.85; color: var(--kt-text-2); max-width: 62ch; margin-bottom: clamp(2.2rem,6vw,3rem); }
+
+/* ── SECTION: PARAMETERS (above the board) ──────────────────── */
+.kt-section-label {
+  font-family: var(--font-sans); font-size: 11.5px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--kt-text-3); margin-bottom: 0.9rem; display: flex; align-items: center; gap: 10px;
+}
+.kt-section-label::after { content: ''; flex: 1; height: 1px; background: var(--kt-border); }
+
+.kt-params {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: clamp(14px,3vw,22px);
+  padding: 1.4rem 1.5rem; border: 1px solid var(--kt-border); border-radius: 12px;
+  background: var(--kt-card); margin-bottom: clamp(2.2rem,6vw,3rem);
+}
+.kt-field { display: flex; flex-direction: column; gap: 6px; }
+.kt-field label { font-family: var(--font-sans); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--kt-text-3); }
+.kt-field input {
+  width: 84px; font-family: var(--font-sans); font-size: 16px; color: var(--kt-text);
+  background: transparent; border: 1px solid var(--kt-border-2); border-radius: 8px; padding: 9px 12px;
+}
+.kt-field input:focus { outline: 2px solid var(--kt-accent); outline-offset: 1px; }
+.kt-field-hint { font-family: var(--font-sans); font-size: 11px; color: var(--kt-text-3); }
+
+.kt-generate-btn {
+  all: unset; cursor: pointer; box-sizing: border-box;
+  font-family: var(--font-sans); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--kt-generate-text); background: var(--kt-accent); padding: 12px 26px; border-radius: 30px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.kt-generate-btn:hover { transform: translateY(-1px); opacity: 0.92; }
+.kt-generate-btn:active { transform: translateY(0); }
+
+.kt-param-error {
+  width: 100%; font-family: var(--font-serif); font-style: italic; font-size: 14px;
+  color: #B5482F; display: none;
+}
+.kt-param-error.visible { display: block; }
+
+/* ── SECTION: BOARD ──────────────────────────────────────────── */
+.kt-board-section { margin-bottom: clamp(2.4rem,6vw,3.2rem); }
+
+.kt-board-shell {
+  background: var(--kt-board-bg);
+  border-radius: 18px;
+  padding: clamp(18px,4vw,30px);
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+}
+.kt-board-shell svg { width: 100%; max-width: 480px; height: auto; display: block; }
+
+.kt-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 480px; }
+.kt-ctrl-btn {
+  all: unset; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 1px solid rgba(232,241,245,0.28); color: #EAF2F6;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.kt-ctrl-btn:hover { background: rgba(232,241,245,0.10); border-color: rgba(232,241,245,0.5); }
+.kt-ctrl-btn:disabled { opacity: 0.35; cursor: default; }
+.kt-ctrl-btn:disabled:hover { background: none; border-color: rgba(232,241,245,0.28); }
+
+.kt-scrubber { flex: 1; min-width: 120px; accent-color: #7FD9C4; }
+.kt-step-count { font-family: var(--font-sans); font-size: 12px; color: #C7D6DE; white-space: nowrap; min-width: 92px; text-align: right; }
+
+.kt-ctrl-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.kt-ctrl-label {
+  font-family: var(--font-sans); font-size: 9.5px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #9FB0BB; white-space: nowrap;
+}
+
+/* ── IMPOSSIBLE-TOUR EXPLANATION PANEL ──────────────────────────
+   Deliberately NOT styled like an error/warning banner — warm,
+   generous, and tied to the user's own entered dimensions.        */
+.kt-explain {
+  border: 1px solid var(--kt-border-2); border-radius: 14px;
+  padding: clamp(1.8rem,5vw,2.6rem); background: var(--kt-card);
+  margin-bottom: clamp(2.4rem,6vw,3.2rem);
+}
+.kt-explain-title {
+  font-family: var(--font-display); font-style: italic; font-weight: 300;
+  font-size: clamp(22px,4vw,28px); margin-bottom: 0.9rem; color: var(--kt-text);
+}
+.kt-explain-body { font-family: var(--font-serif); font-size: 16.5px; line-height: 1.85; color: var(--kt-text-2); max-width: 62ch; }
+.kt-explain-body p { margin-bottom: 1em; }
+.kt-explain-body p:last-child { margin-bottom: 0; }
+.kt-explain-diagram { margin: 1.4rem 0; display: flex; justify-content: center; }
+.kt-explain-diagram svg { max-width: 260px; width: 100%; height: auto; }
+.kt-explain-tally {
+  display: flex; gap: 22px; justify-content: center; margin-top: 0.6rem;
+  font-family: var(--font-sans); font-size: 13px; color: var(--kt-text-2);
+}
+.kt-explain-tally b { color: var(--kt-text); }
+
+/* ── SECTION: EXPLANATORY CARDS (above the graph) ───────────── */
+.kt-cards-section { margin-bottom: clamp(2.4rem,6vw,3.2rem); }
+.kt-cards { display: flex; flex-direction: column; gap: 14px; }
+.kt-card {
+  border: 1px solid var(--kt-border); border-radius: 12px;
+  padding: 1.3rem 1.5rem; background: var(--kt-card);
+}
+.kt-card-num {
+  font-family: var(--font-display); font-style: italic; font-size: 13px;
+  color: var(--kt-text-3); margin-bottom: 0.35rem;
+}
+.kt-card-title {
+  font-family: var(--font-serif); font-weight: 600; font-size: 16.5px;
+  color: var(--kt-text); margin-bottom: 0.5rem;
+}
+.kt-card-body { font-family: var(--font-serif); font-size: 15.5px; line-height: 1.75; color: var(--kt-text-2); }
+.kt-card-body p { margin-bottom: 0.9em; }
+.kt-card-body p:last-child { margin-bottom: 0; }
+
+/* ── SECTION: GRAPH VIEW (below the cards) ──────────────────── */
+.kt-graph-section { margin-bottom: 1rem; }
+.kt-graph-caption { font-family: var(--font-serif); font-style: italic; font-size: 14.5px; color: var(--kt-text-3); margin-bottom: 1rem; max-width: 60ch; }
+.kt-graph-shell {
+  background: var(--kt-board-bg); border-radius: 18px;
+  padding: clamp(18px,4vw,28px); display: flex; justify-content: center;
+}
+.kt-graph-shell svg { width: 100%; max-width: 480px; height: auto; display: block; }
+
+@media (max-width: 480px) {
+  .kt-params { flex-direction: column; align-items: stretch; }
+  .kt-field input { width: 100%; }
+  .kt-generate-btn { width: 100%; text-align: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kt-inner { transition: none; }
+}
+</style>
+</head>
+<body class="kt-page">
+
+<div id="kt-page" class="kt-inner">
+
+  <div class="kt-topbar">
+    <a href="topics.html" class="kt-back-link"><span aria-hidden="true">&larr;</span> Topics</a>
+    <button id="kt-theme-toggle" class="kt-theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <svg id="kt-icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+      <svg id="kt-icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none" aria-hidden="true">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="kt-wrap">
+
+    <p class="kt-eyebrow">Chess &middot; Chapter I</p>
+    <h1 class="kt-title">The Closed Knight's Tour</h1>
+    <p class="kt-intro">
+      Can a knight visit every square of a board exactly once, and return
+      to where it started? Pick a board size below and watch the search
+      unfold — or find out, gently, why a particular size can't be done.
+    </p>
+
+    <p class="kt-section-label">Choose a board</p>
+    <div class="kt-params">
+      <div class="kt-field">
+        <label for="kt-rows">Rows</label>
+        <input type="number" id="kt-rows" min="5" max="10" value="8"/>
+      </div>
+      <div class="kt-field">
+        <label for="kt-cols">Columns</label>
+        <input type="number" id="kt-cols" min="5" max="10" value="8"/>
+      </div>
+      <button id="kt-generate" class="kt-generate-btn">Search for a tour</button>
+      <p class="kt-field-hint">Sizes between 5&times;5 and 10&times;10 &mdash; large enough to be interesting, small enough to stay legible.</p>
+      <p id="kt-param-error" class="kt-param-error"></p>
+    </div>
+
+    <div id="kt-result"></div>
+
+    <div class="kt-cards-section">
+      <p class="kt-section-label">The mathematics behind it</p>
+      <div class="kt-cards">
+        <div class="kt-card">
+          <div class="kt-card-num">Card 1</div>
+          <div class="kt-card-title">What's a graph, really?</div>
+          <div class="kt-card-body"><div class="kt-card-body">A graph is just a collection of points and lines joining some of those points.
+             On a chessboard, each square becomes a point, and we draw a line whenever a knight can move from one square to another in a single move. That simple idea is enough to turn the knight's tour into a graph problem.</div></div>
+        </div>
+        <div class="kt-card"> <div class="kt-card-num">Card 2</div>
+         <div class="kt-card-title">The tour is a path through the graph</div>
+         <div class="kt-card-body">A knight’s tour is a route that visits every square exactly once. If the last square also connects back to the first, the tour is closed. 
+            In graph language, that is called a Hamiltonian cycle.</div> </div>
+        <div class="kt-card"> <div class="kt-card-num">Card 3</div>
+         <div class="kt-card-title">Why some boards cannot work</div> 
+         <div class="kt-card-body">A knight always switches square color with every move. So on a closed tour, the two colors have to balance out perfectly. 
+            That already rules out every odd-by-odd board, and Schwenk's theorem goes further by giving the full list of rectangular boards that do or do not admit a closed tour.</div> </div>
+        <div class="kt-card"> <div class="kt-card-num">Card 4</div>
+         <div class="kt-card-title">How we actually search for one</div>
+          <div class="kt-card-body">A very common way to look for a tour is Warnsdorff's rule: from the current square, move to the square with the fewest onward moves.
+             It sounds almost too simple, but it works surprisingly well in practice, especially when paired with backtracking if a dead end appears.</div> </div>
+        <div class="kt-card"> <div class="kt-card-num">Card 5</div> 
+        <div class="kt-card-title">The theorem behind the answer</div> 
+        <div class="kt-card-body">Allen Schwenk's theorem tells us exactly when a rectangular board has a closed knight's tour. A readable summary is on Wikipedia:
+             <br><br><a href="https://en.wikipedia.org/wiki/Knight%27s_tour" target="_blank" rel="noopener">Knight's tour</a></div> </div>
+      </div>
+    </div>
+
+    <div class="kt-graph-section">
+      <p class="kt-section-label">The graph underneath the board</p>
+      <p class="kt-graph-caption" id="kt-graph-caption">Every square as a dot, every legal knight move as a line. Corner squares have only two connections; central squares have up to eight &mdash; the board's true shape, once the checkerboard is stripped away.</p>
+      <div class="kt-graph-shell">
+        <svg id="kt-graph-svg" viewBox="0 0 500 500" role="img" aria-label="Knight's move graph for the current board"></svg>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ================================================================
+     1. EXISTENCE CHECK — Schwenk's classification, simplified.
+     Covers parity, the three "too narrow" cases, and the handful of
+     small sporadic exceptions. This is a representative subset of
+     the full theorem, not every exhaustively enumerated exception —
+     the search itself is the ultimate fallback if a size somehow
+     slips through and genuinely has no closed tour.
+     ================================================================ */
+  function existenceCheck(m, n) {
+    var a = Math.min(m, n);
+    if ((m * n) % 2 === 1) return { ok: false, reason: 'parity' };
+    if (a === 1) return { ok: false, reason: 'narrow1' };
+    if (a === 2) return { ok: false, reason: 'narrow2' };
+    if (a === 3) return { ok: false, reason: 'narrow3' };
+    // Per Schwenk (1991): a side of length 4 excludes a closed tour for
+    // EVERY n, not just 4x4/4x6 — corrected from the earlier version,
+    // which only special-cased those two sizes.
+    if (a === 4) return { ok: false, reason: 'excludedFour' };
+    return { ok: true };
+  }
+
+  /* ================================================================
+     2. SEARCH — Warnsdorff-ordered backtracking for a closed tour.
+     Fast in practice up to 10x10; a hard step cap prevents the
+     browser from ever hanging if a size were to behave pathologically.
+     ================================================================ */
+  var KNIGHT_MOVES = [[1,2],[2,1],[2,-1],[1,-2],[-1,-2],[-2,-1],[-2,1],[-1,2]];
+
+  /* Plain Warnsdorff's-heuristic backtracking is known to be reliable for
+     OPEN tours but can genuinely dead-end on certain board sizes (6x6
+     included) when searching for a CLOSED tour specifically, purely
+     because of how ties between equal-degree candidate squares get
+     broken during the search — not because the size lacks a tour.
+     Fix: randomize the tie-breaking order and retry several times. Each
+     attempt is independent and cheap; in practice a working tour is
+     found within the first few attempts whenever one exists. */
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+    }
+    return arr;
+  }
+
+  function findClosedTour(m, n) {
+    var MAX_ATTEMPTS = 60;
+    for (var attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      var result = attemptClosedTour(m, n);
+      if (result) return result;
+    }
+    return null;
+  }
+
+  function attemptClosedTour(m, n) {
+    var N = m * n;
+    function idx(r, c) { return r * n + c; }
+    function neighbors(r, c) {
+      var res = [];
+      for (var i = 0; i < 8; i++) {
+        var nr = r + KNIGHT_MOVES[i][0], nc = c + KNIGHT_MOVES[i][1];
+        if (nr >= 0 && nr < m && nc >= 0 && nc < n) res.push([nr, nc]);
+      }
+      return res;
+    }
+    var visited = new Array(N).fill(-1);
+    var path = [[0, 0]];
+    visited[idx(0, 0)] = 0;
+    var steps = 0, STEP_CAP = 150000; // per-attempt cap; many cheap attempts beat one huge one
+
+    function degree(r, c) {
+      var d = 0, nb = neighbors(r, c);
+      for (var i = 0; i < nb.length; i++) if (visited[idx(nb[i][0], nb[i][1])] < 0) d++;
+      return d;
+    }
+
+    function backtrack(r, c, count) {
+      steps++;
+      if (steps > STEP_CAP) return false;
+      if (count === N) {
+        var nb = neighbors(r, c);
+        for (var i = 0; i < nb.length; i++) if (nb[i][0] === 0 && nb[i][1] === 0) return true;
+        return false;
+      }
+      // Shuffle first, then a STABLE sort by degree — this randomizes
+      // the order among equal-degree ties instead of always trying
+      // them in the same fixed order every time.
+      var nb = shuffle(neighbors(r, c).filter(function (p) { return visited[idx(p[0], p[1])] < 0; }));
+      nb.sort(function (a, b) { return degree(a[0], a[1]) - degree(b[0], b[1]); });
+      for (var i = 0; i < nb.length; i++) {
+        var nr = nb[i][0], nc = nb[i][1];
+        visited[idx(nr, nc)] = count;
+        path.push([nr, nc]);
+        if (backtrack(nr, nc, count + 1)) return true;
+        path.pop();
+        visited[idx(nr, nc)] = -1;
+        if (steps > STEP_CAP) return false;
+      }
+      return false;
+    }
+
+    var found = backtrack(0, 0, 1);
+    return found ? path : null;
+  }
+
+  /* ================================================================
+     2b. HARDCODED TOURS — pre-computed closed tours for every valid
+     (m, n) in the 5–10 range, brute-forced offline. For any size
+     covered here, NO search runs at all: the tour is looked up
+     directly. This sidesteps the backtracking search's occasional
+     failure to find a closed tour on sizes that do have one (a
+     tie-breaking/heuristic limitation, not a mathematical one).
+
+     Stored 0-indexed as [row, col], keyed "rows,cols" exactly as
+     entered (e.g. "5,8" for 5 rows × 8 columns). Only one order per
+     asymmetric size is stored explicitly; the reverse order (e.g.
+     "8,5") is produced automatically by transposing every [row, col]
+     pair to [col, row] — valid because the knight-move graph is
+     symmetric under transposition. Square sizes (6×6, 8×8, 10×10)
+     need no transpose.
+
+     Every odd×odd size in the 5–10 range (5×5, 5×7, 5×9, 7×7, 7×9,
+     9×9) has no closed tour at all (see existenceCheck's parity
+     rule), so no entry is needed for those — they're correctly
+     handled before this table is ever consulted.
+     ================================================================ */
+  var HARDCODED_TOURS_RAW = {
+    '5,6': [[1,1],[2,3],[1,5],[3,6],[5,5],[3,4],[4,6],[5,4],[4,2],[2,1],[1,3],[2,5],[4,4],[5,6],[3,5],[1,6],[2,4],[1,2],[3,1],[5,2],[3,3],[4,1],[5,3],[4,5],[2,6],[1,4],[2,2],[4,3],[5,1],[3,2]],
+    '5,8': [[1,1],[2,3],[3,1],[1,2],[2,4],[1,6],[2,8],[4,7],[5,5],[3,6],[1,5],[2,7],[4,8],[5,6],[4,4],[5,2],[3,3],[2,1],[4,2],[5,4],[3,5],[1,4],[2,6],[1,8],[3,7],[5,8],[4,6],[3,4],[1,3],[2,5],[1,7],[3,8],[5,7],[4,5],[5,3],[4,1],[2,2],[4,3],[5,1],[3,2]],
+    '5,10': [[1,1],[2,3],[3,1],[1,2],[2,4],[1,6],[2,8],[1,10],[3,9],[5,10],[4,8],[3,10],[5,9],[4,7],[5,5],[3,6],[1,5],[2,7],[1,9],[3,8],[4,10],[5,8],[4,6],[5,4],[4,2],[2,1],[1,3],[3,4],[2,2],[4,1],[5,3],[4,5],[5,7],[4,9],[2,10],[1,8],[2,6],[1,4],[3,3],[5,2],[4,4],[2,5],[1,7],[2,9],[3,7],[5,6],[3,5],[4,3],[5,1],[3,2]],
+    '6,6': [[1,2],[3,1],[5,2],[6,4],[5,6],[3,5],[1,6],[2,4],[3,6],[1,5],[2,3],[1,1],[3,2],[5,1],[6,3],[5,5],[4,3],[6,2],[4,1],[2,2],[1,4],[2,6],[4,5],[6,6],[5,4],[4,6],[6,5],[4,4],[2,5],[1,3],[3,4],[5,3],[6,1],[4,2],[2,1],[3,3]],
+    '6,7': [[1,7],[3,6],[5,7],[6,5],[4,6],[6,7],[5,5],[4,7],[6,6],[5,4],[6,2],[4,1],[2,2],[1,4],[2,6],[3,4],[1,5],[2,7],[3,5],[1,6],[3,7],[5,6],[6,4],[5,2],[3,1],[1,2],[2,4],[4,3],[5,1],[6,3],[4,2],[6,1],[5,3],[4,5],[3,3],[2,1],[1,3],[3,2],[1,1],[2,3],[4,4],[2,5]],
+    '6,8': [[1,2],[3,1],[5,2],[6,4],[5,6],[6,8],[4,7],[2,8],[1,6],[2,4],[3,2],[1,1],[2,3],[1,5],[2,7],[4,8],[6,7],[5,5],[6,3],[5,1],[4,3],[6,2],[4,1],[2,2],[1,4],[3,5],[5,4],[6,6],[5,8],[3,7],[1,8],[2,6],[3,8],[1,7],[3,6],[5,7],[4,5],[5,3],[6,1],[4,2],[2,1],[1,3],[3,4],[4,6],[6,5],[4,4],[2,5],[3,3]],
+    '6,9': [[1,1],[2,3],[1,5],[2,7],[1,9],[3,8],[5,9],[6,7],[4,8],[6,9],[5,7],[4,9],[6,8],[5,6],[6,4],[5,2],[3,1],[1,2],[2,4],[1,6],[2,8],[3,6],[1,7],[2,9],[3,7],[1,8],[3,9],[5,8],[6,6],[4,7],[2,6],[4,5],[5,3],[6,1],[4,2],[2,1],[1,3],[2,5],[4,6],[6,5],[4,4],[6,3],[5,5],[3,4],[2,2],[1,4],[3,5],[5,4],[3,3],[4,1],[6,2],[4,3],[5,1],[3,2]],
+    '6,10': [[1,2],[3,1],[5,2],[6,4],[5,6],[6,8],[5,10],[3,9],[1,10],[2,8],[3,10],[1,9],[2,7],[1,5],[2,3],[1,1],[3,2],[5,1],[6,3],[4,4],[6,5],[5,3],[6,1],[4,2],[2,1],[1,3],[2,5],[1,7],[2,9],[4,10],[6,9],[4,8],[6,7],[5,9],[4,7],[6,6],[5,8],[6,10],[4,9],[2,10],[1,8],[3,7],[1,6],[2,4],[3,6],[5,5],[4,3],[6,2],[4,1],[2,2],[3,4],[4,6],[5,4],[3,5],[1,4],[2,6],[3,8],[5,7],[4,5],[3,3]],
+    '7,8': [[7,8],[6,6],[7,4],[6,2],[4,1],[2,2],[1,4],[2,6],[1,8],[3,7],[5,8],[7,7],[6,5],[7,3],[6,1],[5,3],[7,2],[5,1],[3,2],[1,1],[2,3],[1,5],[2,7],[4,8],[6,7],[7,5],[6,3],[7,1],[5,2],[3,1],[1,2],[2,4],[1,6],[2,8],[4,7],[6,8],[7,6],[6,4],[4,5],[3,3],[2,1],[1,3],[2,5],[1,7],[3,8],[4,6],[5,4],[4,2],[3,4],[5,5],[4,3],[3,5],[5,6],[4,4],[3,6],[5,7]],
+    '7,10': [[1,10],[2,8],[3,10],[1,9],[2,7],[1,5],[2,3],[1,1],[3,2],[1,3],[2,1],[4,2],[6,1],[7,3],[6,5],[7,7],[6,9],[4,10],[2,9],[1,7],[2,5],[4,4],[6,3],[7,1],[5,2],[3,1],[1,2],[2,4],[1,6],[3,5],[1,4],[2,2],[4,1],[3,3],[5,4],[6,2],[7,4],[5,3],[7,2],[5,1],[4,3],[6,4],[7,6],[5,5],[3,6],[4,8],[5,10],[7,9],[6,7],[7,5],[5,6],[6,8],[7,10],[5,9],[7,8],[6,10],[4,9],[2,10],[1,8],[3,7],[5,8],[6,6],[4,5],[5,7],[3,8],[4,6],[3,4],[2,6],[4,7],[3,9]],
+    '8,8': [[8,1],[7,3],[8,5],[7,7],[5,8],[3,7],[1,8],[2,6],[3,8],[1,7],[2,5],[1,3],[2,1],[4,2],[6,1],[8,2],[7,4],[8,6],[7,8],[5,7],[6,5],[8,4],[7,2],[5,1],[3,2],[1,1],[2,3],[1,5],[2,7],[4,8],[6,7],[8,8],[7,6],[6,8],[8,7],[6,6],[4,7],[2,8],[1,6],[2,4],[1,2],[3,1],[5,2],[7,1],[8,3],[7,5],[6,3],[4,4],[3,6],[5,5],[3,4],[4,6],[5,4],[3,3],[1,4],[2,2],[4,1],[5,3],[4,5],[6,4],[5,6],[3,5],[4,3],[6,2]],
+    '8,9': [[8,1],[6,2],[8,3],[7,1],[5,2],[3,1],[1,2],[2,4],[1,6],[2,8],[4,9],[6,8],[8,9],[7,7],[6,9],[8,8],[7,6],[8,4],[7,2],[5,1],[3,2],[1,1],[2,3],[1,5],[2,7],[1,9],[3,8],[1,7],[2,9],[4,8],[3,6],[5,7],[7,8],[5,9],[4,7],[3,9],[1,8],[2,6],[1,4],[2,2],[4,1],[3,3],[2,1],[1,3],[2,5],[4,4],[6,3],[8,2],[6,1],[4,2],[3,4],[5,5],[4,3],[3,5],[5,6],[6,4],[8,5],[6,6],[8,7],[7,9],[5,8],[3,7],[4,5],[5,3],[7,4],[8,6],[6,7],[7,5],[5,4],[4,6],[6,5],[7,3]],
+    '8,10': [[1,2],[3,1],[2,3],[1,1],[3,2],[5,1],[7,2],[8,4],[7,6],[8,8],[7,10],[5,9],[3,10],[1,9],[2,7],[1,5],[3,4],[1,3],[2,1],[4,2],[6,1],[8,2],[6,3],[7,1],[8,3],[7,5],[8,7],[7,9],[5,10],[3,9],[1,10],[2,8],[1,6],[2,4],[4,3],[2,2],[4,1],[6,2],[8,1],[7,3],[8,5],[6,4],[5,2],[4,4],[2,5],[1,7],[2,9],[4,10],[6,9],[8,10],[7,8],[6,10],[8,9],[7,7],[5,8],[3,7],[1,8],[2,10],[4,9],[6,8],[5,6],[4,8],[3,6],[5,7],[3,8],[2,6],[1,4],[3,5],[4,7],[5,5],[6,7],[8,6],[7,4],[5,3],[6,5],[4,6],[5,4],[6,6],[4,5],[3,3]],
+    '9,10': [[1,2],[3,1],[2,3],[1,1],[3,2],[1,3],[2,1],[4,2],[6,1],[8,2],[9,4],[8,6],[9,8],[8,10],[6,9],[4,10],[2,9],[1,7],[2,5],[4,4],[5,2],[7,1],[9,2],[7,3],[8,1],[9,3],[8,5],[9,7],[8,9],[6,10],[7,8],[9,9],[7,10],[8,8],[9,10],[7,9],[5,10],[3,9],[1,10],[2,8],[3,10],[1,9],[2,7],[1,5],[3,6],[4,8],[6,7],[5,9],[3,8],[2,10],[1,8],[2,6],[1,4],[2,2],[4,1],[3,3],[5,4],[6,2],[8,3],[9,1],[7,2],[5,1],[6,3],[8,4],[9,6],[7,5],[8,7],[9,5],[7,4],[5,3],[3,4],[4,6],[6,5],[7,7],[5,8],[6,6],[4,7],[5,5],[7,6],[6,8],[4,9],[5,7],[4,5],[3,7],[1,6],[3,5],[5,6],[6,4],[4,3],[2,4]],
+    '10,10': [[1,7],[2,9],[4,10],[6,9],[8,10],[10,9],[9,7],[10,5],[9,3],[10,1],[8,2],[6,1],[4,2],[2,1],[1,3],[2,5],[3,3],[1,2],[3,1],[2,3],[1,1],[3,2],[5,1],[7,2],[9,1],[10,3],[9,5],[10,7],[9,9],[7,10],[8,8],[9,10],[10,8],[8,9],[10,10],[9,8],[10,6],[9,4],[10,2],[8,1],[6,2],[4,1],[2,2],[1,4],[2,6],[1,8],[2,10],[3,8],[1,9],[3,10],[5,9],[7,8],[6,10],[4,9],[2,8],[1,10],[3,9],[5,10],[7,9],[8,7],[6,8],[4,7],[6,6],[5,8],[3,7],[1,6],[2,4],[4,5],[5,7],[7,6],[8,4],[9,2],[10,4],[9,6],[7,7],[8,5],[7,3],[5,2],[7,1],[8,3],[6,4],[4,3],[3,5],[5,4],[7,5],[5,6],[4,8],[2,7],[1,5],[3,4],[4,6],[6,7],[8,6],[6,5],[5,3],[7,4],[5,5],[6,3],[4,4],[3,6]]
+  };
+
+  // Convert the 1-indexed raw data above to the 0-indexed [row, col]
+  // format used everywhere else on this page (renderBoard, renderGraph, etc).
+  var HARDCODED_TOURS = {};
+  Object.keys(HARDCODED_TOURS_RAW).forEach(function (key) {
+    HARDCODED_TOURS[key] = HARDCODED_TOURS_RAW[key].map(function (p) { return [p[0] - 1, p[1] - 1]; });
+  });
+
+  function getHardcodedTour(m, n) {
+    var direct = HARDCODED_TOURS[m + ',' + n];
+    if (direct) return direct.slice();
+    var swapped = HARDCODED_TOURS[n + ',' + m];
+    if (swapped) return swapped.map(function (p) { return [p[1], p[0]]; });
+    return null;
+  }
+
+  /* ================================================================
+     3. BOARD RENDERING — fixed footprint, dynamic square size,
+     glass/frosted palette. Per animation spec §8d and §8a.
+     ================================================================ */
+  var FOOTPRINT = 460; // fixed board footprint in SVG units, per §8d
+
+  function renderBoard(svg, m, n, path, currentStep) {
+    var sq = FOOTPRINT / Math.max(m, n);
+    var boardW = sq * n, boardH = sq * m;
+    var offX = (FOOTPRINT - boardW) / 2, offY = (FOOTPRINT - boardH) / 2;
+    var fontSize = Math.max(14, Math.min(sq * 0.62, 46)); // moderate, readable — never maximized
+
+    function cx(c) { return offX + (c + 0.5) * sq; }
+    function cy(r) { return offY + (r + 0.5) * sq; }
+    function tlx(c) { return offX + c * sq; }
+    function tly(r) { return offY + r * sq; }
+
+    var parts = [];
+    parts.push('<rect x="' + offX + '" y="' + offY + '" width="' + boardW + '" height="' + boardH + '" fill="var(--kt-sq-light)"/>');
+    for (var r = 0; r < m; r++) {
+      for (var c = 0; c < n; c++) {
+        if ((r + c) % 2 === 1) {
+          parts.push('<rect x="' + tlx(c) + '" y="' + tly(r) + '" width="' + sq + '" height="' + sq + '" fill="var(--kt-sq-dark)"/>');
+        }
+      }
+    }
+
+    // visited-square footprints (tint) + a circle marker on every visited square.
+    // The very first square of the tour, and the final square once the tour
+    // has closed the loop back to the start, are circled in the endpoint
+    // color; every other visited square in between gets the normal
+    // visited-ring color.
+    var isClosedComplete = (currentStep === path.length);
+    for (var i = 0; i < currentStep; i++) {
+      var p = path[i];
+      var isCurrent = (i === currentStep - 1);
+      parts.push('<rect x="' + tlx(p[1]) + '" y="' + tly(p[0]) + '" width="' + sq + '" height="' + sq + '" fill="' +
+        (isCurrent ? 'var(--kt-current-tint)' : 'var(--kt-visited-tint)') + '"/>');
+      var isEndpoint = (i === 0) || (isClosedComplete && i === path.length - 1);
+      parts.push('<circle cx="' + cx(p[1]) + '" cy="' + cy(p[0]) + '" r="' + (sq * 0.32) + '" fill="none" stroke="' +
+        (isEndpoint ? 'var(--kt-start-ring)' : 'var(--kt-visited-ring)') + '" stroke-width="' + (isEndpoint ? 2.75 : 2) + '"/>');
+    }
+
+    // trace: halo then main, connecting all visited centers up to currentStep
+    if (currentStep > 1) {
+      var d = 'M ' + cx(path[0][1]) + ' ' + cy(path[0][0]);
+      for (var k = 1; k < currentStep; k++) d += ' L ' + cx(path[k][1]) + ' ' + cy(path[k][0]);
+      parts.push('<path d="' + d + '" fill="none" stroke="var(--kt-trace-halo)" stroke-opacity="0.18" stroke-width="' + (sq*0.13) + '" stroke-linecap="round" stroke-linejoin="round"/>');
+      parts.push('<path d="' + d + '" fill="none" stroke="var(--kt-trace-main)" stroke-opacity="0.85" stroke-width="' + (sq*0.055) + '" stroke-linecap="round" stroke-linejoin="round"/>');
+    }
+
+    // border
+    parts.push('<rect x="' + offX + '" y="' + offY + '" width="' + boardW + '" height="' + boardH + '" fill="none" stroke="var(--kt-border-glass)" stroke-width="1.5" rx="6"/>');
+
+    // the knight itself, at the current square
+    if (currentStep > 0) {
+      var kp = path[currentStep - 1];
+      parts.push('<text x="' + cx(kp[1]) + '" y="' + cy(kp[0]) + '" text-anchor="middle" dominant-baseline="central" font-size="' + fontSize +
+        '" fill="var(--kt-piece-fill)" stroke="var(--kt-piece-stroke)" stroke-width="' + (fontSize*0.032) + '" paint-order="stroke fill" stroke-linejoin="round">&#9822;</text>');
+    }
+
+    svg.setAttribute('viewBox', '0 0 ' + FOOTPRINT + ' ' + FOOTPRINT);
+    svg.innerHTML = parts.join('');
+  }
+
+  /* ================================================================
+     4. GRAPH VIEW — grid-laid-out knight graph, same current step.
+     (A force-directed layout was discussed as a stronger long-term
+     visual — flagged as a future enhancement, not built here, so
+     the graph reliably renders correctly for every board size now.)
+     ================================================================ */
+  function renderGraph(svg, m, n, path, currentStep) {
+    var sq = FOOTPRINT / Math.max(m, n);
+    var boardW = sq * n, boardH = sq * m;
+    var offX = (FOOTPRINT - boardW) / 2, offY = (FOOTPRINT - boardH) / 2;
+    function cx(c) { return offX + (c + 0.5) * sq; }
+    function cy(r) { return offY + (r + 0.5) * sq; }
+    var r_node = Math.max(2.5, Math.min(sq * 0.14, 7));
+
+    var parts = [];
+    // faint full knight-graph
+    for (var r = 0; r < m; r++) {
+      for (var c = 0; c < n; c++) {
+        for (var i = 0; i < KNIGHT_MOVES.length; i++) {
+          var nr = r + KNIGHT_MOVES[i][0], nc = c + KNIGHT_MOVES[i][1];
+          if (nr >= r && nr < m && nc >= 0 && nc < n) { // draw each edge once
+            if (nr === r && nc < c) continue;
+            parts.push('<line x1="' + cx(c) + '" y1="' + cy(r) + '" x2="' + cx(nc) + '" y2="' + cy(nr) + '" stroke="var(--kt-border-glass)" stroke-opacity="0.35" stroke-width="1"/>');
+          }
+        }
+      }
+    }
+    // highlighted tour edges up to currentStep
+    for (var k = 1; k < currentStep; k++) {
+      var a = path[k - 1], b = path[k];
+      parts.push('<line x1="' + cx(a[1]) + '" y1="' + cy(a[0]) + '" x2="' + cx(b[1]) + '" y2="' + cy(b[0]) + '" stroke="var(--kt-trace-main)" stroke-opacity="0.9" stroke-width="2.2"/>');
+    }
+    // nodes
+    for (var r2 = 0; r2 < m; r2++) {
+      for (var c2 = 0; c2 < n; c2++) {
+        parts.push('<circle cx="' + cx(c2) + '" cy="' + cy(r2) + '" r="' + r_node + '" fill="var(--kt-sq-light)" fill-opacity="0.85"/>');
+      }
+    }
+    // current node emphasis
+    if (currentStep > 0) {
+      var kp = path[currentStep - 1];
+      parts.push('<circle cx="' + cx(kp[1]) + '" cy="' + cy(kp[0]) + '" r="' + (r_node * 1.8) + '" fill="none" stroke="var(--kt-start-ring)" stroke-width="2"/>');
+    }
+
+    svg.setAttribute('viewBox', '0 0 ' + FOOTPRINT + ' ' + FOOTPRINT);
+    svg.innerHTML = parts.join('');
+  }
+
+  /* ================================================================
+     5. IMPOSSIBLE-TOUR EXPLANATION — generous, tied to the user's
+     own dimensions, never phrased as an error.
+     ================================================================ */
+  function renderExplanation(container, m, n, reason) {
+    var title, body, showColoring = false;
+    if (reason === 'parity') {
+      title = "A " + m + "\u00D7" + n + " board can't quite close the loop";
+      body = '<p>Color the ' + m + '\u00D7' + n + ' board the usual checkerboard way. Every knight move lands on the opposite color from where it started \u2014 that\'s just the geometry of an L-shape, not a special rule.</p>' +
+        '<p>A <em>closed</em> tour has to alternate colors all the way around and end exactly where it began, which only works if there are equal numbers of each color. Because ' + m + ' \u00D7 ' + n + ' = ' + (m*n) + ' is odd, one color always has one more square than the other \u2014 so the loop can never close evenly, no matter how cleverly the knight hops.</p>' +
+        '<p>This isn\'t a limitation of the search \u2014 it\'s a short, complete proof that no closed tour can exist on this exact size.</p>';
+      showColoring = true;
+    } else if (reason === 'narrow1' || reason === 'narrow2') {
+      title = "A " + m + "\u00D7" + n + " board is too narrow to close the loop";
+      body = '<p>When one side of the board is only ' + Math.min(m,n) + ' square' + (Math.min(m,n)===1?'':'s') + ' wide, a knight simply doesn\'t have enough room to maneuver \u2014 many squares along the edge only connect to one or two others, which makes it impossible to weave a path that visits everything and still returns home.</p>' +
+        '<p>This was proven by direct case analysis rather than a quick coloring trick, but the conclusion is just as firm: boards this narrow never admit a closed tour, regardless of length.</p>';
+    } else if (reason === 'narrow3') {
+      title = "A " + m + "\u00D7" + n + " board is one case narrower than a closed tour needs";
+      body = '<p>Three-wide boards are a special case in the theory: no ' + '3\u00D7n board, however long, ever admits a <em>closed</em> knight\'s tour \u2014 the two boundary rows constrain the knight\'s options too tightly for a path to both cover every square and loop back on itself.</p>';
+    } else if (reason === 'excludedFour') {
+      title = "A board with a side of length 4 never closes the loop";
+      body = '<p>This isn\'t a one-off exception for a couple of small sizes \u2014 <em>every</em> board where one side is exactly 4 squares wide, however long the other side is, fails to admit a closed knight\'s tour. 4\u00D74, 4\u00D76, 4\u00D710, 4\u00D7100 \u2014 all of them.</p>' +
+        '<p>Allen Schwenk\'s 1991 classification names this as one of its three fundamental excluded cases, alongside odd\u00D7odd boards and boards narrower than 4. It sits in an odd middle ground: wide enough that the coloring argument alone doesn\'t rule it out, yet still constrained enough that no closed tour ever fits \u2014 which is exactly why it needed its own dedicated proof rather than falling out of a simpler rule.</p>';
+    } else {
+      title = "A " + m + "\u00D7" + n + " board is one of the rare exceptions";
+      body = '<p>This size passes every general rule \u2014 it\'s not odd\u00D7odd, and it\'s wide enough on both sides \u2014 and yet it\'s one of a short, explicitly known list of small exceptions where a closed tour still doesn\'t exist. Allen Schwenk\'s 1991 classification accounts for exactly these sporadic cases by name, alongside the general rules.</p>' +
+        '<p>It\'s a good reminder that even a clean existence theorem sometimes needs a handful of individually-checked exceptions to be completely correct.</p>';
+    }
+
+    var html = '<div class="kt-explain-title">' + title + '</div><div class="kt-explain-body">' + body;
+    if (showColoring) {
+      var lightCount = Math.ceil(m*n/2), darkCount = Math.floor(m*n/2);
+      html += '<div class="kt-explain-diagram">' + coloringSvg(m, n) + '</div>' +
+        '<div class="kt-explain-tally"><span>Light squares: <b>' + lightCount + '</b></span><span>Dark squares: <b>' + darkCount + '</b></span></div>';
+    }
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  function coloringSvg(m, n) {
+    var size = 220, sq = size / Math.max(m, n);
+    var w = sq * n, h = sq * m, ox = (size - w) / 2, oy = (size - h) / 2;
+    var s = '<svg viewBox="0 0 ' + size + ' ' + size + '" width="100%" height="100%">';
+    for (var r = 0; r < m; r++) {
+      for (var c = 0; c < n; c++) {
+        s += '<rect x="' + (ox + c*sq) + '" y="' + (oy + r*sq) + '" width="' + sq + '" height="' + sq +
+          '" fill="' + ((r+c)%2===0 ? '#E8F1F5' : '#26344A') + '" stroke="#3A4A63" stroke-width="0.5"/>';
+      }
+    }
+    s += '</svg>';
+    return s;
+  }
+
+  /* ================================================================
+     6. WIRE-UP — parameter validation, generation, playback
+     ================================================================ */
+  var rowsInput = document.getElementById('kt-rows');
+  var colsInput = document.getElementById('kt-cols');
+  var generateBtn = document.getElementById('kt-generate');
+  var errorEl = document.getElementById('kt-param-error');
+  var resultEl = document.getElementById('kt-result');
+  var graphSvg = document.getElementById('kt-graph-svg');
+  var graphCaption = document.getElementById('kt-graph-caption');
+
+  var state = { path: null, step: 0, playing: false, timer: null, m: 8, n: 8 };
+
+  function showError(msg) { errorEl.textContent = msg; errorEl.classList.add('visible'); }
+  function clearError() { errorEl.textContent = ''; errorEl.classList.remove('visible'); }
+
+  function buildBoardUI() {
+    resultEl.innerHTML =
+      '<div class="kt-board-section"><div class="kt-board-shell">' +
+      '<svg id="kt-board-svg" viewBox="0 0 460 460" role="img" aria-label="Chessboard showing the knight\'s tour in progress"></svg>' +
+      '<div class="kt-controls">' +
+      '<div class="kt-ctrl-item"><button class="kt-ctrl-btn" id="kt-btn-first" title="First">&#8676;</button><span class="kt-ctrl-label">First</span></div>' +
+      '<div class="kt-ctrl-item"><button class="kt-ctrl-btn" id="kt-btn-prev" title="Step back">&#9664;</button><span class="kt-ctrl-label">Back</span></div>' +
+      '<div class="kt-ctrl-item"><button class="kt-ctrl-btn" id="kt-btn-play" title="Play/Pause">&#9654;</button><span class="kt-ctrl-label" id="kt-btn-play-label">Play</span></div>' +
+      '<input type="range" class="kt-scrubber" id="kt-scrubber" min="0" max="1" value="0"/>' +
+      '<div class="kt-ctrl-item"><button class="kt-ctrl-btn" id="kt-btn-next" title="Step forward">&#9654;</button><span class="kt-ctrl-label">Next</span></div>' +
+      '<div class="kt-ctrl-item"><button class="kt-ctrl-btn" id="kt-btn-last" title="Last">&#8677;</button><span class="kt-ctrl-label">Last</span></div>' +
+      '<span class="kt-step-count" id="kt-step-count">Move 0 of 0</span>' +
+      '</div></div></div>';
+
+    document.getElementById('kt-btn-first').onclick = function () { pause(); setStep(0); };
+    document.getElementById('kt-btn-prev').onclick = function () { pause(); setStep(Math.max(0, state.step - 1)); };
+    document.getElementById('kt-btn-next').onclick = function () { pause(); setStep(Math.min(state.path.length, state.step + 1)); };
+    document.getElementById('kt-btn-last').onclick = function () { pause(); setStep(state.path.length); };
+    document.getElementById('kt-btn-play').onclick = togglePlay;
+    var scrubber = document.getElementById('kt-scrubber');
+    scrubber.max = state.path.length;
+    scrubber.oninput = function () { pause(); setStep(parseInt(scrubber.value, 10)); };
+  }
+
+  function setStep(step) {
+    state.step = step;
+    var svg = document.getElementById('kt-board-svg');
+    if (svg) renderBoard(svg, state.m, state.n, state.path, step);
+    renderGraph(graphSvg, state.m, state.n, state.path, step);
+    var scrubber = document.getElementById('kt-scrubber');
+    if (scrubber) scrubber.value = step;
+    var countEl = document.getElementById('kt-step-count');
+    if (countEl) countEl.textContent = 'Move ' + step + ' of ' + state.path.length;
+    if (step >= state.path.length) pause();
+  }
+
+  function togglePlay() {
+    if (state.playing) { pause(); return; }
+    state.playing = true;
+    document.getElementById('kt-btn-play').innerHTML = '&#10074;&#10074;';
+    var playLabel = document.getElementById('kt-btn-play-label');
+    if (playLabel) playLabel.textContent = 'Pause';
+    var speed = state.n * state.m > 64 ? 90 : 160; // faster stepping for bigger boards
+    state.timer = setInterval(function () {
+      if (state.step >= state.path.length) { pause(); return; }
+      setStep(state.step + 1);
+    }, speed);
+  }
+  function pause() {
+    state.playing = false;
+    clearInterval(state.timer);
+    var btn = document.getElementById('kt-btn-play');
+    if (btn) btn.innerHTML = '&#9654;';
+    var playLabel = document.getElementById('kt-btn-play-label');
+    if (playLabel) playLabel.textContent = 'Play';
+  }
+
+  function generate() {
+    clearError();
+    var m = parseInt(rowsInput.value, 10), n = parseInt(colsInput.value, 10);
+    if (!m || !n || m < 5 || n < 5 || m > 10 || n > 10) {
+      showError('Please choose whole numbers between 5 and 10 for both rows and columns.');
+      return;
+    }
+    pause();
+    state.m = m; state.n = n;
+
+    var check = existenceCheck(m, n);
+    if (!check.ok) {
+      resultEl.innerHTML = '<div class="kt-explain"></div>';
+      renderExplanation(resultEl.querySelector('.kt-explain'), m, n, check.reason);
+      renderGraph(graphSvg, m, n, [[0,0]], 0);
+      graphCaption.textContent = 'No closed tour exists for this size, so the graph above is shown without a highlighted path \u2014 but every legal knight move is still there to explore.';
+      return;
+    }
+
+    var path = getHardcodedTour(m, n);
+    if (!path) {
+      // Fallback only — every valid (non-odd×odd) size in the 5–10
+      // range has a hardcoded entry above, so this should not run in
+      // normal operation. Kept so the page never dead-ends if the
+      // allowed size range changes later without the table being
+      // extended to match.
+      path = findClosedTour(m, n);
+    }
+    if (!path) {
+      resultEl.innerHTML = '<div class="kt-explain"><div class="kt-explain-title">The search didn\'t find one this time</div><div class="kt-explain-body"><p>This size should have a closed tour, but the search didn\'t land on one within its step budget. This is a limitation of the search, not a proof of impossibility \u2014 try generating again, or try a nearby size.</p></div></div>';
+      return;
+    }
+    state.path = path;
+    graphCaption.textContent = 'Every square as a dot, every legal knight move as a line \u2014 the highlighted path lights up in sync with the board above as you step through the tour.';
+    buildBoardUI();
+    setStep(0);
+  }
+
+  generateBtn.addEventListener('click', generate);
+
+  /* ── page reveal + theme toggle (matches the rest of the section) ── */
+  var page = document.getElementById('kt-page');
+  requestAnimationFrame(function () { requestAnimationFrame(function () { page.classList.add('visible'); }); });
+
+  function syncIcon(t) {
+    var moon = document.getElementById('kt-icon-moon'), sun = document.getElementById('kt-icon-sun');
+    if (!moon || !sun) return;
+    moon.style.display = t === 'dark' ? 'none' : 'block';
+    sun.style.display = t === 'dark' ? 'block' : 'none';
+  }
+  syncIcon(document.documentElement.getAttribute('data-theme'));
+  document.getElementById('kt-theme-toggle').addEventListener('click', function () {
+    var curr = document.documentElement.getAttribute('data-theme');
+    var next = curr === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('mg-theme', next);
+    syncIcon(next);
+  });
+
+  /* initial generation on load, using the default 8x8 */
+  generate();
+})();
+</script>
+
+</body>
+</html>

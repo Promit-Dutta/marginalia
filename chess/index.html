@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Chess — Marginalia</title>
+<meta name="description" content="Mathematics of chess — a distinct corner of Marginalia, a personal mathematics blog."/>
+<meta name="robots" content="noindex"/>
+<script>
+  (function(){
+    var s=localStorage.getItem('mg-theme');
+    var d=window.matchMedia('(prefers-color-scheme:dark)').matches;
+    document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));
+  })();
+</script>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=EB+Garamond:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400&family=Nanum+Brush+Script&display=swap"/>
+<link rel="stylesheet" href="../css/base.css"/>
+<style>
+  /* ================================================================
+     chess/index.html — page-scoped styles only.
+     Everything below is prefixed .chess-* / #chess-* and is isolated
+     to this page. Nothing here touches base.css or layout.css rules.
+
+     PALETTE NOTE: .chess-home defines its own local tokens (--chess-*),
+     independent of base.css's --bg/--text. Light mode: near-white
+     surface, deep charcoal-navy ink. Dark mode: near-black surface,
+     warm-white ink. The checkerboard hero band below uses a THIRD,
+     fixed palette (icy blue / deep navy glass) that does not change
+     with the toggle — it's a constant visual identity for the
+     section, same idea as the Glass/frosted board theme used
+     elsewhere in the Chess section's board spec.
+     ================================================================ */
+
+  body.chess-page {
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SPLASH ──────────────────────────────────────────────────
+     A fixed, full-viewport interstitial styled as an antique
+     naturalist-illustration plate. Untouched from the previous pass. */
+  #chess-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5vw;
+    cursor: pointer;
+    background: #e6dbbd;
+    transition: opacity 0.7s ease;
+  }
+  #chess-splash.fade-out { opacity: 0; pointer-events: none; }
+
+  #chess-splash .chess-grain {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .chess-plate-frame {
+    position: relative;
+    width: min(92vw, 460px);
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: clamp(22px, 5vw, 40px) clamp(20px, 5vw, 40px) clamp(26px, 5vw, 34px);
+    text-align: center;
+  }
+  .chess-plate-frame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1.5px solid #5b4429;
+  }
+  .chess-plate-frame::after {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border: 0.5px solid rgba(91, 68, 41, 0.55);
+  }
+  .chess-corner {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-color: #5b4429;
+    z-index: 1;
+  }
+  .chess-corner.tl { top: -1px;    left: -1px;   border-top: 1.5px solid;    border-left: 1.5px solid; }
+  .chess-corner.tr { top: -1px;    right: -1px;  border-top: 1.5px solid;    border-right: 1.5px solid; }
+  .chess-corner.bl { bottom: -1px; left: -1px;   border-bottom: 1.5px solid; border-left: 1.5px solid; }
+  .chess-corner.br { bottom: -1px; right: -1px;  border-bottom: 1.5px solid; border-right: 1.5px solid; }
+
+  .chess-oval-wrap {
+    position: relative;
+    width: clamp(150px, 34vw, 190px);
+    height: clamp(150px, 34vw, 190px);
+    margin: 0 auto clamp(14px, 3vw, 20px);
+  }
+  .chess-oval-wrap svg { width: 100%; height: 100%; display: block; }
+
+  .chess-plate-caption {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #6b5738;
+    margin-bottom: clamp(16px, 4vw, 26px);
+  }
+  .chess-plate-caption em {
+    font-family: var(--font-serif);
+    font-style: italic;
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+
+  .chess-quote {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(19px, 4.4vw, 26px);
+    line-height: 1.5;
+    color: #3b2c18;
+    margin-bottom: clamp(10px, 3vw, 16px);
+  }
+  .chess-quote-attr {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6b5738;
+  }
+  .chess-quote-attr::before { content: '\2014 '; }
+
+  .chess-skip-hint {
+    position: absolute;
+    bottom: clamp(14px, 3vh, 26px);
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-sans);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(91, 68, 41, 0.55);
+    opacity: 0;
+    animation: chessHintFade 1s ease 1.4s forwards;
+  }
+  @keyframes chessHintFade { to { opacity: 1; } }
+
+  /* ── FRONT PAGE — local palette ─────────────────────────────
+     Light mode: close to white, deep charcoal-navy ink.
+     Dark mode:  near-black, warm-white ink.                    */
+  .chess-home {
+    --chess-bg:        #FAFAF8;
+    --chess-text:      #1E2430;
+    --chess-text-2:    #3C4657;
+    --chess-text-3:    #737C8C;
+    --chess-border:    rgba(30, 36, 48, 0.12);
+    --chess-border-2:  rgba(30, 36, 48, 0.24);
+    --chess-card:      rgba(30, 36, 48, 0.045);
+    --chess-accent:    #26344A;
+
+    --chess-strip-bg:   #0B0B0B;
+    --chess-strip-text: #F5F5F2;
+    --chess-btn-bg:     linear-gradient(135deg, #F1F6F9, #CFE0EA);
+    --chess-btn-text:   #16202C;
+    --chess-btn-glow:   rgba(207, 224, 234, 0.55);
+
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--chess-bg);
+    color: var(--chess-text);
+    opacity: 0;
+    transition: opacity 0.6s ease, background 0.4s ease, color 0.4s ease;
+  }
+  .chess-home.visible { opacity: 1; }
+
+  [data-theme="dark"] .chess-home {
+    --chess-bg:        #0A0908;
+    --chess-text:      #ECECE8;
+    --chess-text-2:    #C6C6C0;
+    --chess-text-3:    #8A8A83;
+    --chess-border:    rgba(236, 236, 232, 0.12);
+    --chess-border-2:  rgba(236, 236, 232, 0.22);
+    --chess-card:      rgba(255, 255, 255, 0.045);
+    --chess-accent:    #E8F1F5;
+
+    --chess-strip-bg:   #FFFFFF;
+    --chess-strip-text: #12120F;
+    --chess-btn-bg:     linear-gradient(135deg, #2C3C55, #16202C);
+    --chess-btn-text:   #F1F5F8;
+    --chess-btn-glow:   rgba(44, 60, 85, 0.55);
+  }
+
+  /* ── HERO BAND — header + title, confined checkerboard glass ──
+     Fixed navy/icy palette regardless of light/dark toggle — this
+     is the section's constant visual identity, not a themed panel.
+     The pattern + overlay + fade are absolutely positioned layers
+     inside this band ONLY; nothing below it is affected.          */
+  .chess-hero-band {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .chess-board-pattern {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-color: #E8F1F5;
+    background-image:
+      linear-gradient(45deg,  #1B2740 25%, transparent 25%),
+      linear-gradient(-45deg, #1B2740 25%, transparent 25%),
+      linear-gradient(45deg,  transparent 75%, #1B2740 75%),
+      linear-gradient(-45deg, transparent 75%, #1B2740 75%);
+    background-size: 58px 58px;
+    background-position: 0 0, 0 29px, 29px -29px, -29px 0px;
+  }
+  .chess-board-pattern::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg,
+      rgba(255,255,255,0.16) 0%,
+      rgba(255,255,255,0) 32%,
+      rgba(255,255,255,0) 68%,
+      rgba(255,255,255,0.10) 100%);
+    mix-blend-mode: overlay;
+  }
+
+  .chess-hero-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: radial-gradient(ellipse 80% 70% at 50% 38%,
+      rgba(11, 18, 32, 0.18) 0%,
+      rgba(11, 18, 32, 0.58) 100%);
+  }
+
+  /* Blends the bottom edge of the band smoothly into whatever
+     mode-specific page background follows, so the checkerboard
+     ends cleanly rather than cutting off with a hard seam.      */
+  .chess-hero-fade {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(to bottom, transparent 72%, var(--chess-bg) 100%);
+    pointer-events: none;
+  }
+
+  .chess-header {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    padding: 16px clamp(18px, 5vw, 34px);
+    background: rgba(11, 18, 32, 0.26);
+    border-bottom: 1px solid rgba(232, 241, 245, 0.16);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .chess-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    letter-spacing: 0.07em;
+    color: #EAF2F6;
+    opacity: 0.92;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.35);
+    transition: opacity 0.2s ease;
+  }
+  .chess-back-link:hover { opacity: 1; }
+
+  .chess-theme-toggle {
+    all: unset;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(232, 241, 245, 0.30);
+    color: #EAF2F6;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+  .chess-theme-toggle:hover {
+    border-color: rgba(232, 241, 245, 0.60);
+    background: rgba(232, 241, 245, 0.10);
+  }
+
+  .chess-home-hero {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    padding: clamp(3rem, 10vw, 5rem) var(--sp-5) clamp(2.6rem, 9vw, 4.2rem);
+  }
+
+  /* Soft parchment "wash" sitting behind the title + kicker so the
+     black ink reads clearly no matter which checkerboard squares
+     (icy or navy) happen to fall behind it. */
+  .chess-title-wrap {
+    position: relative;
+    display: inline-block;
+  }
+  .chess-title-wash {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    transform: translate(-50%, -50%);
+    width: 150%;
+    height: 200%;
+    background: radial-gradient(ellipse at center,
+      rgba(250, 249, 245, 0.94) 0%,
+      rgba(250, 249, 245, 0.60) 52%,
+      rgba(250, 249, 245, 0) 76%);
+    filter: blur(3px);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Brush-lettered title, painted on with a left-to-right reveal.
+     Color is fixed black in both light and dark mode — this is
+     ink, not a themed element. */
+  .chess-brush-title {
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    font-family: 'Nanum Brush Script', cursive;
+    font-weight: 400;
+    font-size: clamp(76px, 15vw, 128px);
+    line-height: 1;
+    letter-spacing: 0.01em;
+    color: #0B0B0A;
+    transform: rotate(-2deg);
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.12);
+    margin-bottom: -0.05em;
+    clip-path: inset(0 100% 0 0);
+    animation: chessBrushReveal 1.7s cubic-bezier(0.6, 0, 0.3, 1) 0.35s forwards;
+  }
+  @keyframes chessBrushReveal {
+    to { clip-path: inset(0 0% 0 0); }
+  }
+
+  .chess-home-kicker {
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #14140F;
+    margin-top: 0.3rem;
+    opacity: 0;
+    animation: chessFadeUp 0.8s ease 1.9s forwards;
+  }
+  .chess-scroll-cue {
+    display: flex;
+    justify-content: center;
+    margin-top: clamp(1.6rem, 5vw, 2.4rem);
+    color: rgba(11, 11, 10, 0.55);
+    opacity: 0;
+    animation: chessFadeUp 0.8s ease 2.3s forwards,
+               chessBounce 2.4s ease-in-out 2.3s infinite;
+  }
+  @keyframes chessBounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(6px); }
+  }
+  @keyframes chessFadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SCROLL CONTENT — plain near-white / near-black surface ── */
+  .chess-home-scroll {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .chess-content-col {
+    width: 100%;
+    max-width: 660px;
+    margin: 0 auto;
+    padding: clamp(3rem, 9vw, 4rem) var(--sp-5) 0;
+  }
+
+  .chess-section-label {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--chess-text-3);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chess-section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--chess-border);
+  }
+
+  .chess-journey, .chess-purpose {
+    margin-bottom: clamp(2.4rem, 7vw, 3.2rem);
+  }
+
+  /* Comfortable, medium-to-large reading type for the personal writing. */
+  .chess-prose {
+    font-family: var(--font-serif);
+    font-size: 18px;
+    line-height: 1.9;
+    color: var(--chess-text-2);
+  }
+  .chess-prose p { margin-bottom: 1.1em; }
+  .chess-prose p:last-child { margin-bottom: 0; }
+
+  /* Placeholder copy — swap out for the real writing, then remove
+     this class (it only exists to visually mark unfinished text). */
+  .chess-todo {
+    font-style: italic;
+    color: var(--chess-text-3);
+  }
+
+  .chess-rating-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 1.2rem;
+    padding: 10px 18px 10px 14px;
+    border: 1px solid var(--chess-border-2);
+    border-radius: 30px;
+    background: var(--chess-card);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--chess-text);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+  .chess-rating-chip:hover {
+    border-color: var(--chess-accent);
+    transform: translateY(-1px);
+  }
+  .chess-rating-icon { font-size: 16px; line-height: 1; }
+  .chess-rating-link-hint {
+    color: var(--chess-text-3);
+    font-size: 11.5px;
+    margin-left: 2px;
+  }
+
+  .chess-divider {
+    width: 100%;
+    max-width: 660px;
+    margin: 0 auto clamp(2.4rem, 7vw, 3.2rem);
+    height: 1px;
+    background: var(--chess-border);
+    position: relative;
+  }
+  .chess-divider::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 4px;
+    transform: translateX(-50%);
+    width: 34px;
+    height: 1px;
+    background: var(--chess-border-2);
+  }
+
+  /* ── PROCEED — full-bleed strip, inverted to a solid black
+     (light mode) / solid white (dark mode) band, per spec.      */
+  .chess-proceed-strip {
+    width: 100%;
+    margin-top: clamp(2rem, 6vw, 3rem);
+    background: var(--chess-strip-bg);
+    display: flex;
+    justify-content: center;
+    padding: clamp(2.4rem, 8vw, 3.6rem) var(--sp-5);
+  }
+
+  .chess-proceed-btn {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--chess-btn-text);
+    background: var(--chess-btn-bg);
+    padding: 15px 36px;
+    border-radius: 40px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.06),
+                0 8px 22px var(--chess-btn-glow),
+                0 0 30px var(--chess-btn-glow);
+    transition: transform 0.25s ease, box-shadow 0.3s ease;
+    animation: chessGlowPulse 3.4s ease-in-out infinite;
+  }
+  .chess-proceed-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.08),
+                0 12px 28px var(--chess-btn-glow),
+                0 0 46px var(--chess-btn-glow);
+  }
+  .chess-proceed-btn:active { transform: translateY(0); }
+  .chess-proceed-btn svg { transition: transform 0.25s ease; }
+  .chess-proceed-btn:hover svg { transform: translateX(3px); }
+
+  @keyframes chessGlowPulse {
+    0%, 100% {
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.06),
+                  0 8px 22px var(--chess-btn-glow),
+                  0 0 24px var(--chess-btn-glow);
+    }
+    50% {
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.06),
+                  0 8px 26px var(--chess-btn-glow),
+                  0 0 40px var(--chess-btn-glow);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .chess-prose { font-size: 16.5px; }
+    .chess-header { padding: 14px 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #chess-splash { transition: none; }
+    .chess-home { transition: none; }
+    .chess-skip-hint { animation: none; opacity: 1; }
+    .chess-scroll-cue { animation: none; opacity: 1; }
+    .chess-proceed-btn { animation: none; }
+    .chess-brush-title { animation: none; clip-path: inset(0 0% 0 0); }
+    .chess-home-kicker { animation: none; opacity: 1; }
+  }
+</style>
+</head>
+<body class="chess-page">
+
+<!-- ══ SPLASH — antique naturalist illustration plate ══════════
+     Unchanged from the previous version. -->
+<div id="chess-splash" role="button" tabindex="0" aria-label="Continue to Chess">
+
+  <svg class="chess-grain" aria-hidden="true">
+    <defs>
+      <filter id="chessPaperBlotches" x="-30%" y="-30%" width="160%" height="160%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.010 0.014" numOctaves="4" seed="6" result="big"/>
+        <feColorMatrix in="big" type="matrix"
+          values="0 0 0 0 0.47   0 0 0 0 0.37   0 0 0 0 0.22   0 0 0 0.55 0" result="bigTint"/>
+        <feGaussianBlur in="bigTint" stdDeviation="6" result="bigSoft"/>
+        <feTurbulence type="fractalNoise" baseFrequency="0.045 0.06" numOctaves="3" seed="19" result="mid"/>
+        <feColorMatrix in="mid" type="matrix"
+          values="0 0 0 0 0.42  0 0 0 0 0.32  0 0 0 0 0.18  0 0 0 0.16 0" result="midTint"/>
+        <feMerge>
+          <feMergeNode in="bigSoft"/>
+          <feMergeNode in="midTint"/>
+        </feMerge>
+      </filter>
+      <radialGradient id="chessVignette" cx="50%" cy="46%" r="72%">
+        <stop offset="0%"   stop-color="#000000" stop-opacity="0"/>
+        <stop offset="72%"  stop-color="#000000" stop-opacity="0"/>
+        <stop offset="100%" stop-color="#3a2c16" stop-opacity="0.22"/>
+      </radialGradient>
+    </defs>
+    <rect width="100%" height="100%" fill="#e6dbbd"/>
+    <rect width="100%" height="100%" filter="url(#chessPaperBlotches)"/>
+    <rect width="100%" height="100%" fill="url(#chessVignette)"/>
+  </svg>
+
+  <div class="chess-plate-frame">
+    <span class="chess-corner tl" aria-hidden="true"></span>
+    <span class="chess-corner tr" aria-hidden="true"></span>
+    <span class="chess-corner bl" aria-hidden="true"></span>
+    <span class="chess-corner br" aria-hidden="true"></span>
+
+    <div class="chess-oval-wrap">
+      <svg viewBox="0 0 200 200" role="img" aria-label="An engraved illustration of a chess knight, in the style of an antique natural history plate">
+        <defs>
+          <clipPath id="chessOvalClip">
+            <ellipse cx="100" cy="100" rx="88" ry="94"/>
+          </clipPath>
+          <radialGradient id="chessOvalShade" cx="50%" cy="42%" r="65%">
+            <stop offset="0%"  stop-color="#f6ecd6"/>
+            <stop offset="70%" stop-color="#e9dab8"/>
+            <stop offset="100%" stop-color="#c9b48c"/>
+          </radialGradient>
+        </defs>
+
+        <g clip-path="url(#chessOvalClip)">
+          <rect x="0" y="0" width="200" height="200" fill="url(#chessOvalShade)"/>
+          <g stroke="#8a6f45" stroke-width="0.4" opacity="0.35">
+            <path d="M-20,10 L220,190"/><path d="M-20,-10 L220,170"/>
+            <path d="M-20,30 L220,210"/><path d="M-20,50 L220,230"/>
+            <path d="M-20,-30 L220,150"/><path d="M-20,70 L220,250"/>
+            <path d="M-20,-50 L220,130"/><path d="M-20,90 L220,270"/>
+            <path d="M-20,-70 L220,110"/><path d="M-20,110 L220,290"/>
+          </g>
+        </g>
+
+        <ellipse cx="100" cy="100" rx="88" ry="94" fill="none" stroke="#5b4429" stroke-width="1.4"/>
+        <ellipse cx="100" cy="100" rx="81" ry="87" fill="none" stroke="#5b4429" stroke-width="0.5"/>
+
+        <text x="100" y="112" text-anchor="middle" dominant-baseline="central"
+              font-size="92" fill="#3b2c18" font-family="Georgia, 'Times New Roman', serif"
+              style="paint-order:stroke fill" stroke="#2a1f10" stroke-width="0.6">&#9822;</text>
+      </svg>
+    </div>
+
+    <p class="chess-plate-caption">Plate&nbsp;I. &mdash; <em>The&nbsp;Knight</em></p>
+
+    <p class="chess-quote">
+      &ldquo;There are two types of sacrifices: correct ones, and mine.&rdquo;
+    </p>
+    <p class="chess-quote-attr">Mikhail Tal</p>
+  </div>
+
+  <p class="chess-skip-hint">tap to continue</p>
+</div>
+
+<!-- ══ FRONT PAGE — Step B ══════════════════════════════════════
+     Header + hero sit inside a confined glass-checkerboard band.
+     Everything below it (journey / purpose / proceed strip) sits
+     on the plain near-white (light) / near-black (dark) surface. -->
+<div id="chess-home" class="chess-home">
+
+  <div class="chess-hero-band">
+    <div class="chess-board-pattern" aria-hidden="true"></div>
+    <div class="chess-hero-overlay" aria-hidden="true"></div>
+    <div class="chess-hero-fade" aria-hidden="true"></div>
+
+    <header class="chess-header">
+      <a href="../index.html" class="chess-back-link">
+        <span aria-hidden="true">&larr;</span> Marginalia
+      </a>
+
+      <button id="chess-theme-toggle" class="chess-theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg id="chess-icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <svg id="chess-icon-sun" width="15" height="15" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round"
+             style="display:none" aria-hidden="true">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1"  x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1"  y1="12" x2="3"  y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      </button>
+    </header>
+
+    <div class="chess-home-hero">
+      <div class="chess-title-wrap">
+        <div class="chess-title-wash" aria-hidden="true"></div>
+        <h1 class="chess-brush-title">Chess</h1>
+      </div>
+      <p class="chess-home-kicker">A Small, Separate Room In Marginalia</p>
+      <div class="chess-scroll-cue" aria-hidden="true">
+        <svg width="17" height="10" viewBox="0 0 16 9" fill="none">
+          <path d="M1 1l7 7 7-7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="chess-home-scroll">
+
+    <div class="chess-content-col">
+
+      <section class="chess-journey">
+        <p class="chess-section-label">My journey with the game</p>
+        <div class="chess-prose">
+          <!-- TODO(Promit): replace with your own writing — how you found
+               chess, what pulled you in, how your relationship with the
+               game has grown or changed. -->
+          <p class="chess-todo">I learned chess at the age of eight from my uncle, and ever since then I have been deeply fond of the game.
+             Of course, I did not start as early as many grandmasters do, but that never mattered much to me.
+              I was always happy whenever I had the chance to play. 
+            </p>
+
+          <p class="chess-todo">Back then, the strongest opponent I knew was my uncle. If I remember correctly, I probably lost my first twenty games against him. 
+              Learning the rules of chess is easy, mastering the game, however, is an entirely different challenge.</p>
+
+          <p class="chess-todo">
+              In 2021, I made my first online presence by joining chess.com, one of the world's most popular online chess platforms. If I remember correctly, I started with an initial Rapid rating of 1000. As I write this, my Rapid rating is around 1920, so it has been quite a journey so far. I don't think I have reached my plateau yet..not anytime soon, at least. 
+              But regardless of my rating, the joy of playing chess is something I don't think will ever fade. :)</p>
+
+
+          <p class="chess-todo">If you're curious, here's my chess.com profile..</p>
+        </div>
+
+        <!-- TODO(Promit): swap href for your real chess.com profile URL,
+             and replace [rating] with your current rating. -->
+        <a href="https://www.chess.com/member/promitdutta7" class="chess-rating-chip" target="_blank" rel="noopener">
+          <span class="chess-rating-icon" aria-hidden="true">&#9822;</span>
+          <span>chess profile &middot; <strong></strong></span>
+          <span class="chess-rating-link-hint">view profile &rarr;</span>
+        </a>
+      </section>
+
+      <div class="chess-divider" role="presentation"></div>
+
+      <section class="chess-purpose">
+        <p class="chess-section-label">What this space is for</p>
+        <div class="chess-prose">
+          <!-- TODO(Promit): replace with your own framing. Per the section
+               plan, the key point to land: this is for mathematics that
+               happens to involve chess (counting, graph theory in disguise,
+               existence proofs) — not strategy, openings, or commentary. -->
+          <p class="chess-todo"><p>While I am always happy to discuss chess openings, strategy, or the game in general, this page is dedicated to the fascinating mathematics hidden within chess. Here you'll find topics ranging
+             from closed knight's tours and graph-theoretic ideas to counting problems, existence proofs, and other beautiful mathematical 
+             curiosities inspired by the game.</p>
+
+          </p>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="chess-proceed-strip">
+      <!-- Links to the topics list page (chess/topics.html), which is the
+           next build phase and does not exist yet — this will 404 until
+           that page is built. Update the href then, or rename the file
+           to match. -->
+      <a href="topics.html" class="chess-proceed-btn">
+        <span>Proceed</span>
+        <svg width="14" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true">
+          <path d="M1 5h11.5M8 1l4.5 4-4.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  var splash = document.getElementById('chess-splash');
+  var home   = document.getElementById('chess-home');
+  var HOLD_MS = 3400;
+  var FADE_MS = 700;
+  var dismissed = false;
+
+  function reveal() {
+    home.style.display = 'flex';
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { home.classList.add('visible'); });
+    });
+  }
+
+  function dismiss() {
+    if (dismissed) return;
+    dismissed = true;
+    splash.classList.add('fade-out');
+    setTimeout(function () {
+      splash.style.display = 'none';
+      reveal();
+    }, FADE_MS);
+  }
+
+  home.style.display = 'none';
+  var autoTimer = setTimeout(dismiss, HOLD_MS);
+
+  splash.addEventListener('click', function () {
+    clearTimeout(autoTimer);
+    dismiss();
+  });
+  splash.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      clearTimeout(autoTimer);
+      dismiss();
+    }
+  });
+})();
+</script>
+
+<!-- ══ THEME TOGGLE — mirrors the main site's toggle, shares the
+     same 'mg-theme' localStorage key so the choice stays in sync
+     if the person navigates back to the rest of Marginalia. ══════ -->
+<script>
+(function () {
+  function syncIcon(t) {
+    var moon = document.getElementById('chess-icon-moon');
+    var sun  = document.getElementById('chess-icon-sun');
+    if (!moon || !sun) return;
+    moon.style.display = t === 'dark' ? 'none'  : 'block';
+    sun.style.display  = t === 'dark' ? 'block' : 'none';
+  }
+
+  syncIcon(document.documentElement.getAttribute('data-theme'));
+
+  var btn = document.getElementById('chess-theme-toggle');
+  if (btn) {
+    btn.addEventListener('click', function () {
+      var curr = document.documentElement.getAttribute('data-theme');
+      var next = curr === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('mg-theme', next);
+      syncIcon(next);
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

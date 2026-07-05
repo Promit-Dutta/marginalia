@@ -226,52 +226,40 @@
       }
     }
 
-    /* ── Mobile light mode: dark text + white glow halo ─────────────
-   The sky/hill zone behind the title is pale in light mode.
-   var(--text) colours are used directly; white shadows give contrast
-   against whichever part of the painting sits behind the text.     */
-   @media (max-width: 640px) {
-     [data-theme="light"] .site-title {
-     color: #1e261a;
-     text-shadow:
-      0 0 14px rgba(255, 255, 255, 0.96),
-      0 0 32px rgba(255, 255, 255, 0.82),
-      0 2px  8px rgba(255, 255, 255, 0.94);
-     }
-     [data-theme="light"] .site-tagline {
-     color: #4a5c38;
-     text-shadow:
-      0 0 10px rgba(255, 255, 255, 0.92),
-      0 0 24px rgba(255, 255, 255, 0.76);
-     }
-     [data-theme="light"] .hero-eq {
-     color: #7a8e68;
-     text-shadow:
-      0 0  8px rgba(255, 255, 255, 0.88),
-      0 0 18px rgba(255, 255, 255, 0.72);
-  }
-}
+    /* ── Mobile hero text: force light colour + dark halo ──────────
+       On desktop the title sits above the dark tree-line (sky / hill
+       zone). On mobile the SVG scales to fill the full viewport height,
+       which pushes the dark trees and foreground band up into the title
+       zone. var(--text) in light mode is a dark colour — invisible over
+       the dark landscape. This rule, scoped to <=640px, forces every hero
+       text element to a light cream-green and wraps it in a strong dark
+       shadow halo so it reads on any part of the painting in both modes.
 
-
-
-
-
-@keyframes mg-letter-bloom {
-  from { opacity: 0; filter: blur(5px); transform: translateY(5px); }
-  to   { opacity: 1; filter: blur(0);   transform: translateY(0); }
-}
-@keyframes mg-fade-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-
-
-
-
-
-
-
+       PLACEMENT: at the very end of the style block in head,
+       immediately before the closing style tag.
+       The existing .site-title / .site-tagline / .hero-eq rules are
+       untouched — this block simply wins the cascade by appearing later. */
+    @media (max-width: 640px) {
+      .site-title {
+        color: #e8f0dc;
+        text-shadow:
+          0 2px 18px rgba(0, 0, 0, 0.92),
+          0 0  44px rgba(0, 0, 0, 0.82),
+          0 4px  8px rgba(0, 0, 0, 0.97);
+      }
+      .site-tagline {
+        color: rgba(228, 240, 210, 0.90);
+        text-shadow:
+          0 1px 10px rgba(0, 0, 0, 0.90),
+          0 0  24px rgba(0, 0, 0, 0.78);
+      }
+      .hero-eq {
+        color: rgba(210, 228, 192, 0.80);
+        text-shadow:
+          0 1px  8px rgba(0, 0, 0, 0.88),
+          0 0  18px rgba(0, 0, 0, 0.72);
+      }
+    }
   </style>
 </head>
 <body>
@@ -282,7 +270,7 @@
 ═══════════════════════════════════════════════════════════════ -->
 
 
-<canvas id="geo-bg" aria-hidden="true" style="opacity:0;transition:opacity 0.9s ease;"></canvas>
+<canvas id="geo-bg" aria-hidden="true"></canvas>
 
 
 
@@ -632,6 +620,12 @@
 
       <li><a href="notes.html">Marginal Notes</a></li>
       <li><a href="#about">About</a></li>
+      <li class="nav-chess-item">
+        <a href="chess/index.html" class="nav-chess-link" title="Chess — mathematics of chess">
+          <span class="nav-chess-icon" aria-hidden="true">&#9822;</span>
+          Chess
+        </a>
+      </li>
 
     </ul>
 
@@ -795,7 +789,6 @@
     loader.style.display = 'none';
     home.style.display   = 'flex';
     home.classList.add('visible');
-    document.getElementById('geo-bg').style.opacity = '1';
     if (location.hash === '#about') {
       setTimeout(() => {
         const el = document.getElementById('about');
@@ -805,7 +798,7 @@
     return;
   }
   sessionStorage.setItem('mg-intro', '1');
-  document.documentElement.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden'; /* lock ALL scroll during loader */
 
   const cv  = document.getElementById('cv');
   const ctx = cv.getContext('2d');
@@ -831,6 +824,7 @@
 
   function drawFrame(prog, ts) {
     ctx.clearRect(0,0,W,H);
+
     const axisY = cy_(0);
     ctx.save();
     ctx.strokeStyle = 'rgba(80,100,60,0.22)';
@@ -839,6 +833,7 @@
     ctx.strokeStyle = 'rgba(80,100,60,0.35)';
     ctx.beginPath(); ctx.moveTo(cx_(0),axisY-4); ctx.lineTo(cx_(0),axisY+4); ctx.stroke();
     ctx.restore();
+
     ctx.save();
     ctx.setLineDash([3,7]); ctx.lineWidth=0.5; ctx.globalAlpha=0.11;
     ctx.strokeStyle='#4a5c38';
@@ -853,6 +848,7 @@
       ctx.stroke();
     });
     ctx.globalAlpha=1; ctx.setLineDash([]); ctx.restore();
+
     const front = X_MAX-(X_MAX-0.03)*prog;
     const STEPS = mob?700:1500;
     function drawSide(x0,x1){
@@ -867,16 +863,19 @@
       }
       ctx.stroke();
     }
+
     ctx.save();
     ctx.strokeStyle='rgba(90,130,60,0.07)'; ctx.lineWidth=mob?5:7;
     ctx.lineJoin='round'; ctx.lineCap='round';
     drawSide(front,X_MAX); drawSide(-front,-X_MAX);
     ctx.restore();
+
     ctx.save();
     ctx.strokeStyle='rgba(40,62,28,0.80)'; ctx.lineWidth=mob?1.3:1.6;
     ctx.lineJoin='round'; ctx.lineCap='round';
     drawSide(front,X_MAX); drawSide(-front,-X_MAX);
     ctx.restore();
+
     if(prog<.995){
       [front,-front].forEach(x=>{
         if(Math.abs(x)<1e-4)return;
@@ -886,37 +885,6 @@
         ctx.fillStyle=`rgba(60,100,40,${.5+p*.38})`; ctx.fill();
       });
     }
-  }
-
-  /* ── Hero reveal — defined at IIFE scope, NOT inside animate ── */
-  function heroReveal() {
-    var titleEl = document.querySelector('.site-title');
-    var tagEl   = document.querySelector('.site-tagline');
-    var eqEl    = document.querySelector('.hero-eq');
-    if (!titleEl) return;
-
-    tagEl.style.opacity = '0';
-    eqEl.style.opacity  = '0';
-
-    var text = titleEl.textContent;
-    titleEl.innerHTML = '';
-    text.split('').forEach(function(ch, i) {
-      var s = document.createElement('span');
-      s.style.cssText = 'display:inline-block;opacity:0;';
-      s.textContent   = ch;
-      titleEl.appendChild(s);
-      setTimeout(function() {
-        s.style.animation = 'mg-letter-bloom 0.68s cubic-bezier(0.22,1,0.36,1) forwards';
-      }, 120 + i * 80);
-    });
-
-    var titleEnd = 120 + (text.length - 1) * 80 + 680;
-    setTimeout(function() {
-      tagEl.style.animation = 'mg-fade-up 0.72s cubic-bezier(0.22,1,0.36,1) forwards';
-    }, titleEnd - 180);
-    setTimeout(function() {
-      eqEl.style.animation = 'mg-fade-up 0.60s cubic-bezier(0.22,1,0.36,1) forwards';
-    }, titleEnd + 160);
   }
 
   let st=null, hs=null;
@@ -934,14 +902,10 @@
       const home=document.getElementById('home');
       loader.classList.add('fade-out');
       setTimeout(()=>{
-        document.documentElement.style.overflow='';
+        document.documentElement.style.overflow=''; /* restore — CSS overflow-y:scroll resumes */
         loader.style.display='none';
         home.style.display='flex';
-        requestAnimationFrame(()=>requestAnimationFrame(()=>{
-          home.classList.add('visible');
-          document.getElementById('geo-bg').style.opacity = '1';
-          heroReveal();
-        }));
+        requestAnimationFrame(()=>requestAnimationFrame(()=>home.classList.add('visible')));
       },600);
     }
   }
