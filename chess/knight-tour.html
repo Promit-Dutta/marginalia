@@ -208,7 +208,7 @@ body.kt-page { min-height: 100vh; overflow-x: hidden; }
 }
 .kt-explain-tally b { color: var(--kt-text); }
 
-/* ── SECTION: EXPLANATORY CARDS (above the graph) ───────────── */
+/* ── SECTION: EXPLANATORY CARDS (below the graph) ───────────── */
 .kt-cards-section { margin-bottom: clamp(2.4rem,6vw,3.2rem); }
 .kt-cards { display: flex; flex-direction: column; gap: 14px; }
 .kt-card {
@@ -227,8 +227,8 @@ body.kt-page { min-height: 100vh; overflow-x: hidden; }
 .kt-card-body p { margin-bottom: 0.9em; }
 .kt-card-body p:last-child { margin-bottom: 0; }
 
-/* ── SECTION: GRAPH VIEW (below the cards) ──────────────────── */
-.kt-graph-section { margin-bottom: 1rem; }
+/* ── SECTION: GRAPH VIEW (now above the cards) ──────────────── */
+.kt-graph-section { margin-bottom: clamp(2.4rem,6vw,3.2rem); }
 .kt-graph-caption { font-family: var(--font-serif); font-style: italic; font-size: 14.5px; color: var(--kt-text-3); margin-bottom: 1rem; max-width: 60ch; }
 .kt-graph-shell {
   background: var(--kt-board-bg); border-radius: 18px;
@@ -293,6 +293,14 @@ body.kt-page { min-height: 100vh; overflow-x: hidden; }
 
     <div id="kt-result"></div>
 
+    <div class="kt-graph-section">
+      <p class="kt-section-label">The graph underneath the board</p>
+      <p class="kt-graph-caption" id="kt-graph-caption">Every square as a dot, every legal knight move as a line. Corner squares have only two connections; central squares have up to eight &mdash; the board's true shape, once the checkerboard is stripped away.</p>
+      <div class="kt-graph-shell">
+        <svg id="kt-graph-svg" viewBox="0 0 500 500" role="img" aria-label="Knight's move graph for the current board"></svg>
+      </div>
+    </div>
+
     <div class="kt-cards-section">
       <p class="kt-section-label">The mathematics behind it</p>
       <div class="kt-cards">
@@ -318,14 +326,6 @@ body.kt-page { min-height: 100vh; overflow-x: hidden; }
         <div class="kt-card-title">The theorem behind the answer</div> 
         <div class="kt-card-body">Allen Schwenk's theorem tells us exactly when a rectangular board has a closed knight's tour. A readable summary is on Wikipedia:
              <br><br><a href="https://en.wikipedia.org/wiki/Knight%27s_tour" target="_blank" rel="noopener">Knight's tour</a></div> </div>
-      </div>
-    </div>
-
-    <div class="kt-graph-section">
-      <p class="kt-section-label">The graph underneath the board</p>
-      <p class="kt-graph-caption" id="kt-graph-caption">Every square as a dot, every legal knight move as a line. Corner squares have only two connections; central squares have up to eight &mdash; the board's true shape, once the checkerboard is stripped away.</p>
-      <div class="kt-graph-shell">
-        <svg id="kt-graph-svg" viewBox="0 0 500 500" role="img" aria-label="Knight's move graph for the current board"></svg>
       </div>
     </div>
 
