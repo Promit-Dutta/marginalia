@@ -226,40 +226,15 @@
       }
     }
 
-    /* ── Mobile hero text: force light colour + dark halo ──────────
-       On desktop the title sits above the dark tree-line (sky / hill
-       zone). On mobile the SVG scales to fill the full viewport height,
-       which pushes the dark trees and foreground band up into the title
-       zone. var(--text) in light mode is a dark colour — invisible over
-       the dark landscape. This rule, scoped to <=640px, forces every hero
-       text element to a light cream-green and wraps it in a strong dark
-       shadow halo so it reads on any part of the painting in both modes.
-
-       PLACEMENT: at the very end of the style block in head,
-       immediately before the closing style tag.
-       The existing .site-title / .site-tagline / .hero-eq rules are
-       untouched — this block simply wins the cascade by appearing later. */
-    @media (max-width: 640px) {
-      .site-title {
-        color: #e8f0dc;
-        text-shadow:
-          0 2px 18px rgba(0, 0, 0, 0.92),
-          0 0  44px rgba(0, 0, 0, 0.82),
-          0 4px  8px rgba(0, 0, 0, 0.97);
-      }
-      .site-tagline {
-        color: rgba(228, 240, 210, 0.90);
-        text-shadow:
-          0 1px 10px rgba(0, 0, 0, 0.90),
-          0 0  24px rgba(0, 0, 0, 0.78);
-      }
-      .hero-eq {
-        color: rgba(210, 228, 192, 0.80);
-        text-shadow:
-          0 1px  8px rgba(0, 0, 0, 0.88),
-          0 0  18px rgba(0, 0, 0, 0.72);
-      }
-    }
+    /* NOTE: an earlier version had a second, unscoped mobile rule here
+       that forced .site-title / .site-tagline / .hero-eq to a fixed
+       light color on every mobile view, regardless of theme. That's
+       what was causing light-mode text to stay light-colored on mobile
+       instead of turning black like it correctly does on desktop via
+       var(--text). Removed — the [data-theme="dark"] block above
+       already handles dark-mode legibility, and light mode now falls
+       through to the normal var(--text)-based colors, matching
+       desktop behavior on both themes. */
   </style>
 </head>
 <body>
